@@ -2,34 +2,52 @@
 
 Kaggle challenge on DNA sequence classification for Kernel Methods for Machine Learning Course.
 
-## Config
-Le fichier `config/default.yaml` est chargé, puis tout les autres fichiers dans le dossier `config`
-par ordre alphabétique, viennet écraser (ou ajouter) des nouvelles valeurs.
+## Kernels
+Classes extending from `kernels.Kernel`.
 
-`defautl.yaml` un fichier exemple et est le seul fichier versionné. Commencer par créer un autre
-fichier pour les valeurs personnels.
+### Methods to override
+- `apply(self, embed1, embed2)` given two embedding vectors, returns `K(embed1, embed2)`. By default, use a liner kernel
+(i.e. inner product).
+- `embed(self, sequences)` takes a list of string sequence and returns a list of embedded vectors.
+
+## Classifiers
+Classes extending from `classifiers.Classifier`.
+
+### Methods to override
+- `fit(self, X, Y)` and computes and sets `self.alpha` which represents the parameters of the classifier
+so that $f(x) = \sum_i \alpha_i K(x_i, x)$. Must also set `self.training_data = X` at the beginning for the `predict` method.
+
+## Config
+The file `config/default.yaml` is loaded, then all other files in the `config` folder are loaded
+in alphabetical order, overriding (or adding) new values.
+
+`defautl.yaml` is an example file and is the only versionned file.
+To start, create a new file with personal values.
 
 ### kernels
-Config des différents noyaux.
-`kernel` peut être parmi :
+Config of the different kernels.
+`kernel` can be among :
 
 #### onehot
-Simple onehot où une lettre représenté un vecteur de dim 4 onehot.
+Simple onehot where one letter is represented as a 4-dim onehot vector.
 
-Pas d'args.
+No args.
 
 #### spectrum
-Spectre de la sequence, inspiré de slide 55 de [http://members.cbio.mines-paristech.fr/~jvert/talks/060727mlss/mlss.pdf](http://members.cbio.mines-paristech.fr/~jvert/talks/060727mlss/mlss.pdf).
+Spectrum of the sequence, inspired from slide 55 of [http://members.cbio.mines-paristech.fr/~jvert/talks/060727mlss/mlss.pdf](http://members.cbio.mines-paristech.fr/~jvert/talks/060727mlss/mlss.pdf).
 
 Args :
-- length : taille de la fenêtre glissante
+- length : Length of the words to do the spectrum on.
 
 
 ### classifiers
-Config des classfieurs (à ajouter au fur et à mesure).
-Parmi :
+Config of the classifiers
+Among :
 
 #### svm
 
 Args :
-- lbd : lambda de la régularisation.
+- lbd : regularization constant.
+- solver : solver to use. Among :
+    - qp : quadratic program
+    - sklearn : sklearn svm 
