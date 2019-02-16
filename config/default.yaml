@@ -11,3 +11,4 @@ classifiers:
   classifier: svm # in ["svm"]
   args:
     lbd: 0.1
+    solver: qp

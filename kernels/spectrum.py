@@ -1,3 +1,4 @@
+import numpy as np
 from kernels.default import Kernel
 
 __all__ = ['SpectrumKernel']
@@ -12,7 +13,7 @@ class SpectrumKernel(Kernel):
         super(SpectrumKernel, self).__init__()
         self.length = length
 
-    def embed(self, sequence):
+    def embed_one(self, sequence):
         all_nuples = {}
         for k in range(len(sequence) - (self.length - 1)):
             nuple = sequence[k:k + self.length]
@@ -21,6 +22,9 @@ class SpectrumKernel(Kernel):
             else:
                 all_nuples[nuple] = 1
         return all_nuples
+
+    def embed(self, sequences):
+        return np.array([self.embed_one(sequences[k]) for k in range(sequences.shape[0])])
 
     def apply(self, embed1, embed2):
         total = 0

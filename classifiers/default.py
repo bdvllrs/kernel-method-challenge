@@ -4,15 +4,12 @@ from kernels import Kernel
 
 
 class Classifier:
-    def __init__(self, training_data, kernel: Kernel):
-        self.training_data = training_data
+    def __init__(self, kernel: Kernel):
         self.kernel = kernel
-        print('Computing Gram matrix...')
-        self.train_K = kernel(training_data)
-        print('Computed.')
-        self.alpha = np.zeros(self.training_data.shape[0])
+        self.alpha = None
+        self.training_data = None
 
-    def fit(self):
+    def fit(self, data, labels):
         """
         Fit the data.
         """
@@ -24,19 +21,21 @@ class Classifier:
             data: DataFrame containing the data
         Returns: predicted labels for each row
         """
-        K = self.kernel(self.training_data.values, data)
+        assert self.training_data is not None, "Use fit before predicting."
+        K = self.kernel(self.training_data, data)
         f = np.sign(K @ self.alpha)  # in {-1, 0, 1}
         return np.round((f + 1) / 2)  # convert into {0, 1}
 
-    def evaluate(self, data):
+    def evaluate(self, data, labels):
         """
         Args:
-            data: DataFrame containing data and labels
+            data: vector of embeddings
+            labels: ground truth
         Returns: Metrics on the result.
         """
         predictions = self.predict(data)
         return {
-            "MSE": metrics.mse(data['Bound'], predictions),
-            "Accuracy": metrics.accuracy(data['Bound'], predictions),
+            "MSE": metrics.mse(labels, predictions),
+            "Accuracy": metrics.accuracy(labels, predictions),
             # TODO: Add some other metrics like Recall, ...
         }

@@ -8,23 +8,33 @@ import classifiers
 __all__ = ['get_classifier', 'get_kernel', 'get_sets', 'split_train_val']
 
 
-def get_sets(path, slug="tr"):
+def get_sets(path, slug="tr", merge=False):
     path = os.path.abspath(os.path.join(os.curdir, path))
-    data = []
+    datasets = []
+    labels = []
     for k in range(3):
-        data.append(pd.read_csv(os.path.join(path, "X{}{}.csv".format(slug, k))))
+        data = pd.read_csv(os.path.join(path, "X{}{}.csv".format(slug, k)))
+        datasets.append(data['seq'].values)
         if slug == "tr":
-            labels = pd.read_csv(os.path.join(path, "Y{}{}.csv".format(slug, k)))
-            data[-1] = data[-1].merge(labels, on="Id")
-    # data = pd.concat(data)
-    # data["vec"] = data.apply(lambda x: kernel.embed(x['seq']), axis=1)
-    return data
+            labels.append(pd.read_csv(os.path.join(path, "Y{}{}.csv".format(slug, k)))['Bound'].values)
+    if merge:
+        datasets = np.concatenate(datasets)
+        if slug == "tr":
+            labels = np.concatenate(labels)
+    if slug == "tr":
+        return datasets, labels
+    return datasets
 
 
-def split_train_val(data, ratio):
-    shuffled_data = data.sample(frac=1)
+def split_train_val(data, labels, ratio):
+    keys = np.arange(data.shape[0])
+    np.random.shuffle(keys)
     last_key = int(ratio * data.shape[0])
-    return shuffled_data[:last_key], shuffled_data[last_key:]
+    train_data = data[keys[:last_key]]
+    train_labels = labels[keys[:last_key]]
+    val_data = data[keys[last_key:]]
+    val_labels = labels[keys[last_key:]]
+    return train_data, train_labels, val_data, val_labels
 
 
 def get_kernel(kernel: str, args) -> kernels.Kernel:
@@ -38,13 +48,14 @@ def get_kernel(kernel: str, args) -> kernels.Kernel:
     return kernels.OneHotKernel()
 
 
-def get_classifier(classifier: str, training_data, kernel, args) -> classifiers.Classifier:
+def get_classifier(classifier: str, kernel, args) -> classifiers.Classifier:
     classifier = classifier.lower()
     assert classifier in ['svm'], "Unknown requested classifier."
 
     if classifier == "svm":
-        assert "lbd" in args.keys(), "ldb must be in config.classifiers.args for svm."
-        return classifiers.SVMClassifier(training_data, kernel, args['lbd'])
+        assert "lbd" in args.keys(), "`ldb` must be in config.classifiers.args for svm."
+        assert "solver" in args.keys(), "`solver` must be in config.classifiers.args for svm."
+        return classifiers.SVMClassifier(kernel, args['lbd'], args['solver'])
 
 
 # A=(1, 0, 0, 0), C=(0, 1, 0, 0), G=(0, 0, 1, 0), T=(0, 0, 0, 1)
