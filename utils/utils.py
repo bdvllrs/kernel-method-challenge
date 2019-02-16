@@ -2,48 +2,52 @@ import pandas as pd
 import numpy as np
 import random
 import os
+import kernels
+import classifiers
+
+__all__ = ['get_classifier', 'get_kernel', 'get_sets', 'split_train_val']
 
 
-list_dir = os.listdir('.')
-if 'data' in list_dir:
-    root = '.'
-else:
-    root = '..'
+def get_sets(path, slug="tr"):
+    path = os.path.abspath(os.path.join(os.curdir, path))
+    data = []
+    for k in range(3):
+        data.append(pd.read_csv(os.path.join(path, "X{}{}.csv".format(slug, k))))
+        if slug == "tr":
+            labels = pd.read_csv(os.path.join(path, "Y{}{}.csv".format(slug, k)))
+            data[-1] = data[-1].merge(labels, on="Id")
+    # data = pd.concat(data)
+    # data["vec"] = data.apply(lambda x: kernel.embed(x['seq']), axis=1)
+    return data
 
 
-X_train_0 = (pd.read_csv(root + r'/data/Xtr0.csv', header=None).values).tolist()
-X_train_1 = (pd.read_csv(root + r'/data/Xtr1.csv', header=None).values).tolist()
-X_train_2 = (pd.read_csv(root + r'/data/Xtr2.csv', header=None).values).tolist()
+def split_train_val(data, ratio):
+    shuffled_data = data.sample(frac=1)
+    last_key = int(ratio * data.shape[0])
+    return shuffled_data[:last_key], shuffled_data[last_key:]
 
-X_train_matrix_0 = (pd.read_csv(root + r'/data/Xtr0_mat100.csv', sep=' ', header=None).values)
-X_train_matrix_1 = (pd.read_csv(root + r'/data/Xtr1_mat100.csv', sep=' ', header=None).values)
-X_train_matrix_2 = (pd.read_csv(root + r'/data/Xtr2_mat100.csv', sep=' ', header=None).values)
 
-Y_train_0 = (pd.read_csv(root + r'/data/Ytr0.csv', sep=',', index_col=0).values)
-Y_train_1 = (pd.read_csv(root + r'/data/Ytr1.csv', sep=',', index_col=0).values)
-Y_train_2 = (pd.read_csv(root + r'/data/Ytr2.csv', sep=',', index_col=0).values)
+def get_kernel(kernel: str, args) -> kernels.Kernel:
+    kernel = kernel.lower()
+    assert kernel in ['onehot', 'spectrum'], "Unknown requested kernel."
 
-X_test_0 = (pd.read_csv(root + r'/data/Xte0.csv', header=None).values).tolist()
-X_test_1 = (pd.read_csv(root + r'/data/Xte1.csv', header=None).values).tolist()
-X_test_2 = (pd.read_csv(root + r'/data/Xte2.csv', header=None).values).tolist()
+    if kernel == "spectrum":
+        default_args = {"length": 3}
+        default_args.update(args)
+        return kernels.SpectrumKernel(default_args['length'])
+    return kernels.OneHotKernel()
 
-X_test_matrix_0 = (pd.read_csv(root + r'/data/Xte0_mat100.csv', sep=' ', header=None).values)
-X_test_matrix_1 = (pd.read_csv(root + r'/data/Xte1_mat100.csv', sep=' ', header=None).values)
-X_test_matrix_2 = (pd.read_csv(root + r'/data/Xte2_mat100.csv', sep=' ', header=None).values)
 
-X_train_0 = (np.array(X_train_0)[:, 0]).tolist()
-X_train_1 = np.array(X_train_1)[:, 0].tolist()
-X_train_2 = np.array(X_train_2)[:, 0].tolist()
+def get_classifier(classifier: str, training_data, kernel, args) -> classifiers.Classifier:
+    classifier = classifier.lower()
+    assert classifier in ['svm'], "Unknown requested classifier."
 
-X_test_0 = (np.array(X_test_0)[:, 0]).tolist()
-X_test_1 = np.array(X_test_1)[:, 0].tolist()
-X_test_2 = np.array(X_test_2)[:, 0].tolist()
+    if classifier == "svm":
+        assert "lbd" in args.keys(), "ldb must be in config.classifiers.args for svm."
+        return classifiers.SVMClassifier(training_data, kernel, args['lbd'])
 
 
 # A=(1, 0, 0, 0), C=(0, 1, 0, 0), G=(0, 0, 1, 0), T=(0, 0, 0, 1)
-
-
-
 
 def transform_letter_in_one_hot_vector(letter):
     '''
@@ -141,14 +145,11 @@ def train_test_split(*arrays, test_size=0.5):
     random.shuffle(list_indice_shuffle)
     list_train, list_test = list_indice_shuffle[:int(len(list_indice_shuffle) * (1 - test_size))], list_indice_shuffle[
                                                                                                    int(len(
-                                                                                                       list_indice_shuffle) * (
-                                                                                                       1 - test_size)):]
+                                                                                                           list_indice_shuffle) * (
+                                                                                                               1 - test_size)):]
     for array in arrays:
         if isinstance(array, list):
             list_to_return.extend([list(np.array(array)[list_train]), list(np.array(array)[list_test])])
         else:
             list_to_return.extend([(np.array(array)[list_train]), (np.array(array)[list_test])])
-    return list_to_return    
-
-
-
+    return list_to_return

@@ -1,0 +1,13 @@
+data:
+  path: /path/to/data/folder
+
+
+kernels:
+  kernel: onehot # in ["onehot", "spectrum"]
+  args: {}
+
+
+classifiers:
+  classifier: svm # in ["svm"]
+  args:
+    lbd: 0.1

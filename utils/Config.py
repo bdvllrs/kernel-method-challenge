@@ -27,6 +27,9 @@ class Config:
     def set(self, key, value):
         self.__data[key] = value
 
+    def as_dict(self):
+        return self.__data
+
     def __getattr__(self, item):
         if type(self.__data[item]) == dict:
             return Config(config=self.__data[item])
