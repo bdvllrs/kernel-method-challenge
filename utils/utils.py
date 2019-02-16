@@ -8,7 +8,15 @@ import classifiers
 __all__ = ['get_classifier', 'get_kernel', 'get_sets', 'split_train_val']
 
 
-def get_sets(path, slug="tr", merge=False):
+def get_sets(path, slug="tr", merge=False, only=None):
+    """
+    Get data
+    Args:
+        path: path to data
+        slug: tr for training and te for testing
+        merge: if True, merge all three datafiles
+        only: If given, between 0 and 2, only use the requested dataset.
+    """
     path = os.path.abspath(os.path.join(os.curdir, path))
     datasets = []
     labels = []
@@ -21,6 +29,10 @@ def get_sets(path, slug="tr", merge=False):
         datasets = np.concatenate(datasets)
         if slug == "tr":
             labels = np.concatenate(labels)
+    elif only is not None:
+        datasets = datasets[only]
+        if slug == "tr":
+            labels = labels[only]
     if slug == "tr":
         return datasets, labels
     return datasets
