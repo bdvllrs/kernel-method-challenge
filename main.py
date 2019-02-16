@@ -14,12 +14,8 @@ test_data = kernel.embed(test_data)
 train_data, train_labels, val_data, val_labels = split_train_val(train_data, train_labels[0], ratio=0.8)
 
 clf = get_classifier(config.classifiers.classifier, kernel, config.classifiers.args.as_dict())
-
-print("Fitting...")
 print(clf.fit(train_data, train_labels))
 
-print("Evaluating...")
 print(clf.evaluate(val_data, val_labels))
 
-print("Predicting...")
 print(clf.predict(test_data))
