@@ -27,8 +27,13 @@ class Config:
     def set(self, key, value):
         self.__data[key] = value
 
-    def as_dict(self):
+    def values(self):
         return self.__data
+
+    def save(self, file):
+        file = os.path.abspath(os.path.join(os.curdir, file))
+        with open(file, 'w') as f:
+            yaml.dump(self.__data, f)
 
     def __getattr__(self, item):
         if type(self.__data[item]) == dict:

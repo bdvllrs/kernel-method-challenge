@@ -1,6 +1,8 @@
 data:
-  path: /path/to/data/folder
+  path: /path/to/data/folder/
 
+submissions:
+  path: /path/to/submission/folder/
 
 kernels:
   kernel: onehot # in ["onehot", "spectrum"]

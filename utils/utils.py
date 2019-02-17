@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pandas as pd
 import numpy as np
 import random
@@ -5,7 +7,7 @@ import os
 import kernels
 import classifiers
 
-__all__ = ['get_classifier', 'get_kernel', 'get_sets', 'split_train_val']
+__all__ = ['get_classifier', 'get_kernel', 'get_sets', 'save_submission', 'split_train_val']
 
 
 def get_sets(path, slug="tr", merge=False, only=None):
@@ -36,6 +38,21 @@ def get_sets(path, slug="tr", merge=False, only=None):
     if slug == "tr":
         return datasets, labels
     return datasets
+
+
+def save_submission(conf, predictions, accuracy):
+    path = conf.submissions.path
+    method = conf.classifiers.classifier
+    kernel = conf.kernels.kernel
+    date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+    filename = "submission_{}_kernel_{}_val-acc_{}_{}".format(method, kernel, accuracy, date)
+    path_csv = os.path.abspath(os.path.join(os.curdir, path, filename + ".csv"))
+    path_yaml = os.path.abspath(os.path.join(os.curdir, path, filename + ".yaml"))
+    with open(path_csv, 'w') as f:
+        f.write('Id,Bound\n')
+        for i in range(len(predictions)):
+            f.write(str(i)+','+str(predictions[i])+'\n')
+    conf.save(path_yaml)
 
 
 def split_train_val(data, labels, ratio):
