@@ -5,7 +5,7 @@ config = Config('config')
 kernel = get_kernel(config.kernels.kernel, config.kernels.args.values())
 
 train_data, train_labels = get_sets(config.data.path, "tr", only=0)
-test_data = get_sets(config.data.path, "te", merge=True)
+test_data, test_ids = get_sets(config.data.path, "te", merge=True)
 
 train_data = kernel.embed(train_data)
 test_data = kernel.embed(test_data)
@@ -22,4 +22,4 @@ print(results)
 predictions = clf.predict(test_data)
 print(predictions)
 
-save_submission(config, predictions, results['Accuracy'])
+save_submission(config, predictions, test_ids, results['Accuracy'])

@@ -22,36 +22,43 @@ def get_sets(path, slug="tr", merge=False, only=None):
     path = os.path.abspath(os.path.join(os.curdir, path))
     datasets = []
     labels = []
+    ids = []
     for k in range(3):
         data = pd.read_csv(os.path.join(path, "X{}{}.csv".format(slug, k)))
         datasets.append(data['seq'].values)
+        ids.append(data['Id'])
         if slug == "tr":
             labels.append(pd.read_csv(os.path.join(path, "Y{}{}.csv".format(slug, k)))['Bound'].values)
     if merge:
         datasets = np.concatenate(datasets)
+        ids = np.concatenate(ids)
         if slug == "tr":
             labels = np.concatenate(labels)
     elif only is not None:
         datasets = datasets[only]
+        ids = ids[only]
         if slug == "tr":
             labels = labels[only]
     if slug == "tr":
         return datasets, labels
-    return datasets
+    return datasets, ids
 
 
-def save_submission(conf, predictions, accuracy):
+def save_submission(conf, predictions, test_ids, accuracy):
     path = conf.submissions.path
     method = conf.classifiers.classifier
     kernel = conf.kernels.kernel
+    ordered_pred = np.zeros_like(predictions)
+    for k, idx in enumerate(test_ids):
+        ordered_pred[idx] = predictions[k]
     date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     filename = "submission_{}_kernel_{}_val-acc_{}_{}".format(method, kernel, accuracy, date)
     path_csv = os.path.abspath(os.path.join(os.curdir, path, filename + ".csv"))
     path_yaml = os.path.abspath(os.path.join(os.curdir, path, filename + ".yaml"))
     with open(path_csv, 'w') as f:
         f.write('Id,Bound\n')
-        for i in range(len(predictions)):
-            f.write(str(i)+','+str(predictions[i])+'\n')
+        for i in range(len(ordered_pred)):
+            f.write(str(i)+','+str(ordered_pred[i])+'\n')
     conf.save(path_yaml)
 
 
