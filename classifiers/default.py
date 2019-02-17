@@ -25,7 +25,7 @@ class Classifier:
         assert self.training_data is not None, "Use fit before predicting."
         K = self.kernel(self.training_data, data)
         f = np.sign(K @ self.alpha)  # in {-1, 0, 1}
-        return np.round((f + 1) / 2)  # convert into {0, 1}
+        return np.round((f + 1) / 2).astype(int)  # convert into {0, 1}
 
     def evaluate(self, data, labels):
         """
