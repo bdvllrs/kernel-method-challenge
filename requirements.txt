@@ -1,4 +1,4 @@
 scikit-learn
 numpy
 pandas
-qpsolvers
+cvxopt

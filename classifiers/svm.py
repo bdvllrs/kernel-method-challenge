@@ -1,5 +1,5 @@
 import numpy as np
-from qpsolvers import solve_qp
+import cvxopt
 from sklearn import svm  # Not used in the challenge, only for testing purposes.
 from classifiers import Classifier
 
@@ -25,18 +25,14 @@ class SVMClassifier(Classifier):
         $Gx \le h$
         """
         n = self.training_data.shape[0]
-        K = self.kernel(data).astype(float)
-        y = labels.astype(float)
-        y_diag = np.diag(y)
-        P = 1 / (2 * self.lbd) * y_diag @ K @ y_diag + np.eye(n) * 1e-6
-        G = np.concatenate([y_diag, np.diag(-y)], axis=0)
-        h = np.concatenate([np.ones(n) / n, np.zeros(n)]).reshape((2 * n,))
-        A = np.expand_dims(y, axis=0)
-        b = np.array([0])
-        mu = solve_qp(P, -np.ones_like(y), G, h, A, b)
-        self.alpha = y_diag @ mu.transpose() / (2 * self.lbd)
+        K = self.kernel(data).astype(float) + np.eye(n) * 1e-6
+        y = np.array(labels).astype(float)
+        P = cvxopt.matrix(K)
+        q = -cvxopt.matrix(y)
+        G = cvxopt.matrix(np.concatenate([np.diag(y), -np.diag(y)], axis=0))
+        h = cvxopt.matrix(np.concatenate([1 / (2 * self.lbd * n) * np.ones_like(y), np.zeros_like(y)]))
+        self.alpha = np.array(cvxopt.solvers.qp(P, q, G, h)['x']).reshape(-1)
         print(self.alpha.shape)
-        print(self.alpha)
         not_null = np.abs(self.alpha) > 1e-5
         self.alpha = self.alpha[not_null]
         print(self.alpha.shape)
