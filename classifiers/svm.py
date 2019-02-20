@@ -32,11 +32,9 @@ class SVMClassifier(Classifier):
         G = cvxopt.matrix(np.concatenate([np.diag(y), -np.diag(y)], axis=0))
         h = cvxopt.matrix(np.concatenate([1 / (2 * self.lbd * n) * np.ones_like(y), np.zeros_like(y)]))
         self.alpha = np.array(cvxopt.solvers.qp(P, q, G, h)['x']).reshape(-1)
-        print(self.alpha.shape)
-        not_null = np.abs(self.alpha) > 1e-5
-        self.alpha = self.alpha[not_null]
-        print(self.alpha.shape)
         # Only support vectors
+        not_null = np.abs(self.alpha) > 1e-4
+        self.alpha = self.alpha[not_null]
         self.training_data = self.training_data[not_null]
 
     def fit_sklearn(self, data, labels):
