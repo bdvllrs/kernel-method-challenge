@@ -73,15 +73,18 @@ def split_train_val(data, labels, ratio):
     return train_data, train_labels, val_data, val_labels
 
 
-def get_kernel(kernel: str, args) -> kernels.Kernel:
+def get_kernel(kernel: str, kernel_type, gamma, degree, r, args) -> kernels.Kernel:
     kernel = kernel.lower()
     assert kernel in ['onehot', 'spectrum'], "Unknown requested kernel."
 
     if kernel == "spectrum":
         default_args = {"length": 3}
         default_args.update(args)
-        return kernels.SpectrumKernel(default_args['length'])
-    return kernels.OneHotKernel()
+        kernel = kernels.SpectrumKernel(default_args['length'])
+    else:
+        kernel = kernels.OneHotKernel()
+    kernel.set_args(kernel_type, gamma, degree, r)
+    return kernel
 
 
 def get_classifier(classifier: str, kernel, args) -> classifiers.Classifier:
@@ -89,9 +92,9 @@ def get_classifier(classifier: str, kernel, args) -> classifiers.Classifier:
     assert classifier in ['svm'], "Unknown requested classifier."
 
     if classifier == "svm":
-        assert "lbd" in args.keys(), "`ldb` must be in config.classifiers.args for svm."
+        assert "C" in args.keys(), "`C` must be in config.classifiers.args for svm."
         assert "solver" in args.keys(), "`solver` must be in config.classifiers.args for svm."
-        return classifiers.SVMClassifier(kernel, args['lbd'], args['solver'])
+        return classifiers.SVMClassifier(kernel, args['C'], args['solver'])
 
 
 # A=(1, 0, 0, 0), C=(0, 1, 0, 0), G=(0, 0, 1, 0), T=(0, 0, 0, 1)

@@ -6,11 +6,15 @@ submissions:
 
 kernels:
   kernel: onehot # in ["onehot", "spectrum"]
+  type: linear # in ["linear", "polynomial", "gaussian", "sigmoid"]
+  gamma: auto # parameter for polynomial, gaussian and sigmoid
+  degree: 2 # if polynomial, degree of the polynomial
+  r: 0  # added constant for polynomial and sigmoid.
   args: {}
 
 
 classifiers:
   classifier: svm # in ["svm"]
   args:
-    lbd: 0.1
+    C: 1
     solver: qp  # in ["qp", "sklearn"]

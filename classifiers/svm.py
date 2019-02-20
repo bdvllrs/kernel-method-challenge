@@ -5,9 +5,9 @@ from classifiers import Classifier
 
 
 class SVMClassifier(Classifier):
-    def __init__(self, kernel, lbd, solver):
+    def __init__(self, kernel, C, solver):
         super(SVMClassifier, self).__init__(kernel)
-        self.lbd = lbd
+        self.C = C
         self.solver = solver
         self.sklearn_clf = None
 
@@ -30,7 +30,7 @@ class SVMClassifier(Classifier):
         P = cvxopt.matrix(K)
         q = -cvxopt.matrix(y)
         G = cvxopt.matrix(np.concatenate([np.diag(y), -np.diag(y)], axis=0))
-        h = cvxopt.matrix(np.concatenate([1 / (2 * self.lbd * n) * np.ones_like(y), np.zeros_like(y)]))
+        h = cvxopt.matrix(np.concatenate([self.C * np.ones_like(y), np.zeros_like(y)]))
         self.alpha = np.array(cvxopt.solvers.qp(P, q, G, h)['x']).reshape(-1)
         # Only support vectors
         not_null = np.abs(self.alpha) > 1e-4
@@ -41,7 +41,7 @@ class SVMClassifier(Classifier):
         """
         For testing. Not used for the challenge.
         """
-        self.sklearn_clf = svm.SVC(kernel="precomputed", gamma="scale")
+        self.sklearn_clf = svm.SVC(C=self.C, kernel="precomputed", gamma="scale")
         K = self.kernel(data)
         self.sklearn_clf.fit(K, labels)
 

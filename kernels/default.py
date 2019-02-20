@@ -7,6 +7,23 @@ __all__ = ['Kernel', 'OneHotKernel']
 class Kernel:
     def __init__(self):
         self.MEMOIZER = {}
+        self.type = "linear"
+        self.gamma = "auto"
+        self.d = 2
+        self.r = 0
+
+    def set_args(self, kernel_type="linear", gamma="auto", degree=2, r=0):
+        """
+        Args:
+            kernel_type:  in (linear, polynomial, gaussian, sigmoid)
+            gamma: if None, auto defined
+            degree: if polynomial kernel, degree of the polynomial. Default 2.
+            r: added constant for polynomial and sigmoid kernel. Default 0.
+        """
+        self.type = kernel_type
+        self.gamma = gamma
+        self.d = degree
+        self.r = r
 
     def __call__(self, data_1, data_2=None):
         """
@@ -35,7 +52,27 @@ class Kernel:
         """
         Returns the value of K(embed1, embed2)
         """
+        if self.gamma == "auto":
+            self.gamma = 1 / embed1.shape[0]
+        if self.type == "polynomial":
+            return self._polynomial_kernel(embed1, embed2)
+        elif self.type == "gaussian":
+            return self._gaussian_kernel(embed1, embed2)
+        elif self.type == "sigmoid":
+            return self._sigmoid_kernel(embed1, embed2)
+        return self._linear_kernel(embed1, embed2)
+
+    def _linear_kernel(self, embed1, embed2):
         return np.inner(embed1, embed2)
+
+    def _polynomial_kernel(self, embed1, embed2):
+        return (self.gamma * self._linear_kernel(embed1, embed2) + self.r) ** self.d
+
+    def _gaussian_kernel(self, embed1, embed2):
+        return np.exp(-self.gamma * np.linalg.norm(embed1 - embed2) ** 2)
+
+    def _sigmoid_kernel(self, embed1, embed2):
+        return np.tanh(self.gamma * self._linear_kernel(embed1, embed2) + self.r)
 
     def embed(self, sequences):
         raise NotImplemented

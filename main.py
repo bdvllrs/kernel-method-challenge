@@ -2,7 +2,8 @@ from utils import Config, get_classifier, get_sets, get_kernel, split_train_val,
 
 config = Config('config')
 
-kernel = get_kernel(config.kernels.kernel, config.kernels.args.values())
+kernel = get_kernel(config.kernels.kernel, config.kernels.type, config.kernels.gamma, config.kernels.degree,
+                    config.kernels.r, config.kernels.args.values())
 
 train_data, train_labels = get_sets(config.data.path, "tr", only=0)
 test_data, test_ids = get_sets(config.data.path, "te", merge=True)
