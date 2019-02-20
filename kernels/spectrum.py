@@ -15,7 +15,7 @@ class SpectrumKernel(Kernel):
         self.possible_numples = {}
 
     def add_nuples(self, sequence):
-        for k in range(0, len(sequence) - (self.length - 1), self.length):
+        for k in range(0, len(sequence) - (self.length - 1)):
             nuple = sequence[k:k + self.length]
             if nuple in self.possible_numples.keys():
                 self.possible_numples[nuple] += 1
@@ -26,7 +26,7 @@ class SpectrumKernel(Kernel):
     def embed_one(self, sequence):
         nuples = {nuple: k for k, nuple in enumerate(self.possible_numples.keys())}
         vec = np.zeros(len(nuples.keys()))
-        for k in range(0, len(sequence) - (self.length - 1), self.length):
+        for k in range(0, len(sequence) - (self.length - 1)):
             nuple = sequence[k:k + self.length]
             if nuple in nuples.keys():
                 vec[nuples[nuple]] += 1
