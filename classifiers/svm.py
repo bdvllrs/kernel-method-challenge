@@ -26,7 +26,7 @@ class SVMClassifier(Classifier):
         """
         n = self.training_data.shape[0]
         K = self.kernel(data).astype(float) + np.eye(n) * 1e-6
-        y = np.array(labels).astype(float)
+        y = np.array(2 * labels - 1).astype(float)  # to {-1, 1}
         P = cvxopt.matrix(K)
         q = -cvxopt.matrix(y)
         G = cvxopt.matrix(np.concatenate([np.diag(y), -np.diag(y)], axis=0))

@@ -15,12 +15,18 @@ test_data = kernel.embed(test_data)
 train_data, train_labels, val_data, val_labels = split_train_val(train_data, train_labels, ratio=0.8)
 
 clf = get_classifier(config.classifiers.classifier, kernel, config.classifiers.args.values())
+
+print("Fitting...")
 print(clf.fit(train_data, train_labels))
 
+print("Evaluating...")
 results = clf.evaluate(val_data, val_labels)
 print(results)
 
+print("Predicting...")
 predictions = clf.predict(test_data)
 print(predictions)
 
-save_submission(config, predictions, test_ids, results['Accuracy'])
+if config.submissions.save:
+    print("Saving submission...")
+    save_submission(config, predictions, test_ids, results['Accuracy'])

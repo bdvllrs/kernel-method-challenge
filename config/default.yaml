@@ -2,6 +2,7 @@ data:
   path: /path/to/data/folder/
 
 submissions:
+  save: Yes  # If Yes, submissions and associated config file are saved at the given path.
   path: /path/to/submission/folder/
 
 kernels:
@@ -14,7 +15,7 @@ kernels:
 
 
 classifiers:
-  classifier: svm # in ["svm"]
+  classifier: svm # in ["svm", "logistic-regression"]
   args:
     C: 1
     solver: qp  # in ["qp", "sklearn"]

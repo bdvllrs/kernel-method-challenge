@@ -89,12 +89,15 @@ def get_kernel(kernel: str, kernel_type, gamma, degree, r, args) -> kernels.Kern
 
 def get_classifier(classifier: str, kernel, args) -> classifiers.Classifier:
     classifier = classifier.lower()
-    assert classifier in ['svm'], "Unknown requested classifier."
+    assert classifier in ['svm', 'logistic-regression'], "Unknown requested classifier."
 
     if classifier == "svm":
         assert "C" in args.keys(), "`C` must be in config.classifiers.args for svm."
         assert "solver" in args.keys(), "`solver` must be in config.classifiers.args for svm."
         return classifiers.SVMClassifier(kernel, args['C'], args['solver'])
+    elif classifier == "logistic-regression":
+        assert "lambda" in args.keys(), "`lambda` must be in config.classifiers.args for logistic-regression."
+        return classifiers.LogisticRegressionClassifier(kernel, args['lambda'])
 
 
 # A=(1, 0, 0, 0), C=(0, 1, 0, 0), G=(0, 0, 1, 0), T=(0, 0, 0, 1)
