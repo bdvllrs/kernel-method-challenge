@@ -7,10 +7,12 @@ kernel = get_kernel(config.kernels.kernel, config.kernels.type, config.kernels.g
 
 merge = not config.data.kfold and config.data.merge
 only = None if config.data.kfold or config.data.merge else config.data.only
+
 print("K-fold?", config.data.kfold)
 print("Merge?", merge)
 print("Only?", only)
-train_data, train_labels = get_sets(config.data.path, "tr", merge=(not config.data.kfold), only=only)
+
+train_data, train_labels = get_sets(config.data.path, "tr", merge=merge, only=only)
 test_data, test_ids = get_sets(config.data.path, "te", merge=True)
 
 if type(train_data) == list:
