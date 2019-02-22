@@ -3,7 +3,7 @@ from utils import Config, get_classifier, get_sets, get_kernel, kfold, split_tra
 config = Config('config')
 
 kernel = get_kernel(config.kernels.kernel, config.kernels.type, config.kernels.gamma, config.kernels.degree,
-                    config.kernels.r, config.kernels.args.values())
+                    config.kernels.r, config.kernels.args.values_())
 
 merge = not config.data.kfold and config.data.merge
 only = None if config.data.kfold or config.data.merge else config.data.only
@@ -23,7 +23,7 @@ else:
 
 test_data = kernel.embed(test_data)
 
-clf = get_classifier(config.classifiers.classifier, kernel, config.classifiers.args.values())
+clf = get_classifier(config.classifiers.classifier, kernel, config.classifiers.args.values_())
 
 if config.data.kfold:
     results, predictions = kfold(train_data, train_labels, test_data, clf)

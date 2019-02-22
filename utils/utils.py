@@ -59,7 +59,7 @@ def save_submission(conf, predictions, test_ids, accuracy):
         f.write('Id,Bound\n')
         for i in range(len(ordered_pred)):
             f.write(str(i) + ',' + str(ordered_pred[i]) + '\n')
-    conf.save(path_yaml)
+    conf.save_(path_yaml)
 
 
 def split_train_val(data, labels, ratio):
