@@ -35,6 +35,7 @@ class SVMClassifier(Classifier):
         # Only support vectors
         not_null = np.abs(self.alpha) > 1e-4
         self.alpha = self.alpha[not_null]
+        print("{} support vectors found.".format(self.alpha.shape[0]))
         self.training_data = self.training_data[not_null]
 
     def fit_sklearn(self, data, labels):
