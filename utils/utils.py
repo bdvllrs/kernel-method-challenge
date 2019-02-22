@@ -7,7 +7,7 @@ import os
 import kernels
 import classifiers
 
-__all__ = ['get_classifier', 'get_kernel', 'get_sets', 'save_submission', 'split_train_val']
+__all__ = ['get_classifier', 'get_kernel', 'get_sets', 'kfold', 'save_submission', 'split_train_val']
 
 
 def get_sets(path, slug="tr", merge=False, only=None):
@@ -58,8 +58,8 @@ def save_submission(conf, predictions, test_ids, accuracy):
     with open(path_csv, 'w') as f:
         f.write('Id,Bound\n')
         for i in range(len(ordered_pred)):
-            f.write(str(i)+','+str(ordered_pred[i])+'\n')
-    conf.save(path_yaml)
+            f.write(str(i) + ',' + str(ordered_pred[i]) + '\n')
+    conf.save_(path_yaml)
 
 
 def split_train_val(data, labels, ratio):
@@ -89,12 +89,39 @@ def get_kernel(kernel: str, kernel_type, gamma, degree, r, args) -> kernels.Kern
 
 def get_classifier(classifier: str, kernel, args) -> classifiers.Classifier:
     classifier = classifier.lower()
-    assert classifier in ['svm'], "Unknown requested classifier."
+    assert classifier in ['svm', 'logistic-regression'], "Unknown requested classifier."
 
     if classifier == "svm":
         assert "C" in args.keys(), "`C` must be in config.classifiers.args for svm."
         assert "solver" in args.keys(), "`solver` must be in config.classifiers.args for svm."
         return classifiers.SVMClassifier(kernel, args['C'], args['solver'])
+    elif classifier == "logistic-regression":
+        assert "lambda" in args.keys(), "`lambda` must be in config.classifiers.args for logistic-regression."
+        return classifiers.LogisticRegressionClassifier(kernel, args['lambda'])
+
+
+def kfold(orig_data, orig_labels, test_data, clf: classifiers.Classifier):
+    results = []
+    predictions = []
+    best_k = 0
+    for k in range(len(orig_data)):
+        print("Iteration", k + 1, "over", len(orig_data))
+        data, labels = orig_data[:], orig_labels[:]
+        val_data = data.pop(k)
+        val_labels = labels.pop(k)
+        train_data = np.concatenate(data)
+        train_labels = np.concatenate(labels)
+        print("Fitting...")
+        clf.fit(train_data, train_labels)
+        print("Evaluating...")
+        results.append(clf.evaluate(val_data, val_labels))
+        print(results[k])
+        print("Predicting...")
+        predictions.append(clf.predict(test_data))
+        print(predictions[k])
+        if results[k]["Accuracy"] > results[best_k]["Accuracy"]:
+            best_k = k
+    return results[best_k], predictions[best_k]
 
 
 # A=(1, 0, 0, 0), C=(0, 1, 0, 0), G=(0, 0, 1, 0), T=(0, 0, 0, 1)

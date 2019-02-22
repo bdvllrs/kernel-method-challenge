@@ -24,13 +24,13 @@ class Config:
                     with open(os.path.join(self.__path, config), "rb") as config_file:
                         self.__data = update_config(self.__data, yaml.load(config_file))
 
-    def set(self, key, value):
+    def set_(self, key, value):
         self.__data[key] = value
 
-    def values(self):
+    def values_(self):
         return self.__data
 
-    def save(self, file):
+    def save_(self, file):
         file = os.path.abspath(os.path.join(os.curdir, file))
         with open(file, 'w') as f:
             yaml.dump(self.__data, f)

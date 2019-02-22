@@ -47,7 +47,12 @@ Among :
 #### svm
 
 Args :
-- lbd : regularization constant.
+- C : C-svm.
 - solver : solver to use. Among :
     - qp : quadratic program
     - sklearn : sklearn svm 
+    
+#### logistic-regression
+
+Args:
+- lambda: regularization constant.
