@@ -115,9 +115,12 @@ def kfold(orig_data, orig_labels, test_data, clf: classifiers.Classifier):
         clf.fit(train_data, train_labels)
         print("Evaluating...")
         results.append(clf.evaluate(val_data, val_labels))
+        print(results[k])
+        print("Predicting...")
+        predictions.append(clf.predict(test_data))
+        print(predictions[k])
         if results[k]["Accuracy"] > results[best_k]["Accuracy"]:
             best_k = k
-        predictions.append(clf.predict(test_data))
     return results[best_k], predictions[best_k]
 
 
