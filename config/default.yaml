@@ -5,6 +5,7 @@ data:
   only: 0  # if merge is No, which set to keep? Between 0 and 2.
   validation_set:  # if kfold is No...
     ratio: 0.1  # 10 percent of the total data
+  upload_gram: No
 
 submissions:
   save: Yes  # If Yes, submissions and associated config file are saved at the given path.

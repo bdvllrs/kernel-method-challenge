@@ -48,4 +48,5 @@ else:
 
 if config.submissions.save:
     print("Saving submission...")
+    print(predictions, test_ids)
     save_submission(config, predictions, test_ids, results['Accuracy'])

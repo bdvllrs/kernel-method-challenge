@@ -1,16 +1,23 @@
 import numpy as np
 import hashlib
+import pickle as pk
+
+from utils import Config
+
+config = Config('config')
 
 __all__ = ['Kernel', 'OneHotKernel']
 
 
 class Kernel:
     def __init__(self):
+
         self.MEMOIZER = {}
         self.type = "linear"
         self.gamma = "auto"
         self.d = 2
         self.r = 0
+        self.upload = config.data.upload_gram
 
     def set_args(self, kernel_type="linear", gamma="auto", degree=2, r=0):
         """
@@ -32,20 +39,27 @@ class Kernel:
             data_1: array of embeddings
             data_2: (optional) array of embeddings 2. Default: data_2 = data_1.
         """
-        if data_2 is None:
-            data_2 = data_1
+        if self.upload:
+            pass
+            #with (open('Save.p', 'wb')) as f:
+            #    self.MEMOIZER = pk.load(f[0])
+        else:
+            if data_2 is None:
+                data_2 = data_1
+            # Get hashes for memoization
+            hash_1 = hashlib.sha256(data_1.tostring())
+            hash_2 = hashlib.sha256(data_2.tostring())
+            if (hash_1, hash_2) in self.MEMOIZER.keys():
+                print('Using memoized data.')
+                return self.MEMOIZER[(hash_1, hash_2)]
+            if (hash_2, hash_1) in self.MEMOIZER.keys():
+                print('Using memoized data.')
+                return self.MEMOIZER[(hash_2, hash_1)].transpose()
+            gram = np.array([[self.apply(x, y) for x in data_1] for y in data_2])
+            self.MEMOIZER[(hash_1, hash_2)] = gram
 
-        # Get hashes for memoization
-        hash_1 = hashlib.sha256(data_1.tostring())
-        hash_2 = hashlib.sha256(data_2.tostring())
-        if (hash_1, hash_2) in self.MEMOIZER.keys():
-            print('Using memoized data.')
-            return self.MEMOIZER[(hash_1, hash_2)]
-        if (hash_2, hash_1) in self.MEMOIZER.keys():
-            print('Using memoized data.')
-            return self.MEMOIZER[(hash_2, hash_1)].transpose()
-        gram = np.array([[self.apply(x, y) for x in data_1] for y in data_2])
-        self.MEMOIZER[(hash_1, hash_2)] = gram
+            #with (open('Save.p', 'wb')) as f:
+            #    pk.dump(self.MEMOIZER, f)
         return gram
 
     def apply(self, embed1, embed2):
