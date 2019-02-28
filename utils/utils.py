@@ -75,7 +75,7 @@ def split_train_val(data, labels, ratio):
 
 def get_kernel(kernel: str, kernel_type, gamma, degree, r, args) -> kernels.Kernel:
     kernel = kernel.lower()
-    assert kernel in ['onehot', 'spectrum', "mismatch"], "Unknown requested kernel."
+    assert kernel in ['onehot', 'spectrum', "mismatch", "substring"], "Unknown requested kernel."
 
     if kernel == "spectrum":
         default_args = {"length": 3}
@@ -85,6 +85,10 @@ def get_kernel(kernel: str, kernel_type, gamma, degree, r, args) -> kernels.Kern
         default_args = {"length": 3}
         default_args.update(args)
         kernel = kernels.MismatchKernel(default_args['length'])
+    if kernel == "substring":
+        default_args = {"length": 3, "lambda_decay":0.05}
+        default_args.update(args)
+        kernel = kernels.SubstringKernel(default_args['length'])
     else:
         kernel = kernels.OneHotKernel()
     kernel.set_args(kernel_type, gamma, degree, r)
