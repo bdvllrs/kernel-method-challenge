@@ -30,7 +30,7 @@ class SubstringKernel(Kernel):
         return sequences
     
     def K(self, s, t, n):
-        print('K')
+    
         if min(len(s), len(t)) < n:
             return 0
         partial_sum = 0
@@ -44,7 +44,7 @@ class SubstringKernel(Kernel):
         """
         Auxiliary function (K' in the paper)
         """
-        print('B')
+
         if n == 0:
             return 1
         elif min(len(s), len(t)) < n:
