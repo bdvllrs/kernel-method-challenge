@@ -73,25 +73,25 @@ def split_train_val(data, labels, ratio):
     return train_data, train_labels, val_data, val_labels
 
 
-def get_kernel(kernel: str, kernel_type, gamma, degree, r, args) -> kernels.Kernel:
-    kernel = kernel.lower()
+def get_kernel(conf) -> kernels.Kernel:
+    kernel = conf.kernel.lower()
     assert kernel in ['onehot', 'spectrum', "mismatch", "substring"], "Unknown requested kernel."
 
     if kernel == "spectrum":
         default_args = {"length": 3}
-        default_args.update(args)
-        kernel = kernels.SpectrumKernel(default_args['length'])
-    if kernel == "mismatch":
+        default_args.update(conf.args.values_())
+        kernel = kernels.SpectrumKernel(conf.memoize, default_args['length'])
+    elif kernel == "mismatch":
         default_args = {"length": 3}
-        default_args.update(args)
-        kernel = kernels.MismatchKernel(default_args['length'])
-    if kernel == "substring":
-        default_args = {"length": 3, "lambda_decay":0.05}
-        default_args.update(args)
-        kernel = kernels.SubstringKernel(default_args['length'])
+        default_args.update(conf.args.values_())
+        kernel = kernels.MismatchKernel(conf.memoize, default_args['length'])
+    elif kernel == "substring":
+        default_args = {"length": 3, "lambda_decay": 0.05}
+        default_args.update(conf.args.values_())
+        kernel = kernels.SubstringKernel(conf.memoize, default_args['length'])
     else:
-        kernel = kernels.OneHotKernel()
-    kernel.set_args(kernel_type, gamma, degree, r)
+        kernel = kernels.OneHotKernel(conf.memoize)
+    kernel.set_args(conf.type, conf.gamma, conf.degree, conf.r)
     return kernel
 
 

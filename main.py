@@ -2,8 +2,7 @@ from utils import Config, get_classifier, get_sets, get_kernel, kfold, split_tra
 
 config = Config('config')
 
-kernel = get_kernel(config.kernels.kernel, config.kernels.type, config.kernels.gamma, config.kernels.degree,
-                    config.kernels.r, config.kernels.args.values_())
+kernel = get_kernel(config.kernels)
 
 merge = not config.data.kfold and config.data.merge
 only = None if config.data.kfold or config.data.merge else config.data.only
@@ -45,6 +44,8 @@ else:
     print("Predicting...")
     predictions = clf.predict(test_data)
     print(predictions)
+
+kernel.memoizer.save()
 
 if config.submissions.save:
     print("Saving submission...")

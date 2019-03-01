@@ -1,5 +1,8 @@
+# Please copy this file
+# Rename it {yourConfigName}.yaml
+# Change the values
 data:
-  path: /path/to/data/folder/
+  path: relative/path/to/data/folder/
   kfold: No  # If yes, does a 3-fold on the 3 datasets.
   merge: No  # if kfold is No, do we merge all 3 sets?
   only: 0  # if merge is No, which set to keep? Between 0 and 2.
@@ -9,10 +12,13 @@ data:
 
 submissions:
   save: Yes  # If Yes, submissions and associated config file are saved at the given path.
-  path: /path/to/submission/folder/
+  path: relative/path/to/submission/folder/
 
 kernels:
   kernel: onehot # in ["onehot", "spectrum"]
+  memoize:
+    path: relative/path/to/memoized/data/
+
   type: linear # in ["linear", "polynomial", "gaussian", "sigmoid"]
   gamma: auto # parameter for polynomial, gaussian and sigmoid
   degree: 2 # if polynomial, degree of the polynomial

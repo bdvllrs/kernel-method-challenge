@@ -1,3 +1,6 @@
+__author__ = "Benjamin Devillers (bdvllrs)"
+
+
 import numpy as np
 from classifiers import Classifier
 import scipy.optimize as optim

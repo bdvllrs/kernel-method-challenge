@@ -1,23 +1,17 @@
 import numpy as np
 import hashlib
-import pickle as pk
-
-from utils import Config
-
-config = Config('config')
+from utils.memoizer import Memoizer
 
 __all__ = ['Kernel', 'OneHotKernel']
 
 
 class Kernel:
-    def __init__(self):
-
-        self.MEMOIZER = {}
+    def __init__(self, memoize_conf):
+        self.memoizer = Memoizer(memoize_conf, type(self).__name__)
         self.type = "linear"
         self.gamma = "auto"
         self.d = 2
         self.r = 0
-        self.upload = config.data.upload_gram
 
     def set_args(self, kernel_type="linear", gamma="auto", degree=2, r=0):
         """
@@ -34,32 +28,27 @@ class Kernel:
 
     def __call__(self, data_1, data_2=None):
         """
-        Returs the Gram Matrix using the embed values of the self.embed function
+        Returns the Gram Matrix using the embed values of the self.embed function
         Args:
             data_1: array of embeddings
             data_2: (optional) array of embeddings 2. Default: data_2 = data_1.
         """
-        if self.upload:
-            pass
-            #with (open('Save.p', 'wb')) as f:
-            #    self.MEMOIZER = pk.load(f[0])
-        else:
-            if data_2 is None:
-                data_2 = data_1
-            # Get hashes for memoization
-            hash_1 = hashlib.sha256(data_1.tostring())
-            hash_2 = hashlib.sha256(data_2.tostring())
-            if (hash_1, hash_2) in self.MEMOIZER.keys():
-                print('Using memoized data.')
-                return self.MEMOIZER[(hash_1, hash_2)]
-            if (hash_2, hash_1) in self.MEMOIZER.keys():
-                print('Using memoized data.')
-                return self.MEMOIZER[(hash_2, hash_1)].transpose()
-            gram = np.array([[self.apply(x, y) for x in data_1] for y in data_2])
-            self.MEMOIZER[(hash_1, hash_2)] = gram
+        if data_2 is None:
+            data_2 = data_1
+        # Get hashes for memoization
+        hash_1 = hashlib.sha256(data_1.tostring()).hexdigest()
+        hash_2 = hashlib.sha256(data_2.tostring()).hexdigest()
+        if "gram.{}.{}".format(hash_1, hash_2) in self.memoizer:
+            print('Using memoized data.')
+            path = "gram.{}.{}".format(hash_1, hash_2)
+            return self.memoizer[path]
+        if "gram.{}.{}".format(hash_2, hash_1) in self.memoizer:
+            print('Using memoized data.')
+            path = "gram.{}.{}".format(hash_2, hash_1)
+            return self.memoizer[path].transpose()
+        gram = np.array([[self.apply(x, y) for x in data_1] for y in data_2])
+        self.memoizer["gram.{}.{}".format(hash_1, hash_2)] = gram
 
-            #with (open('Save.p', 'wb')) as f:
-            #    pk.dump(self.MEMOIZER, f)
         return gram
 
     def apply(self, embed1, embed2):
@@ -89,6 +78,15 @@ class Kernel:
         return np.tanh(self.gamma * self._linear_kernel(embed1, embed2) + self.r)
 
     def embed(self, sequences):
+        # Add the hash so that it is data dependant.
+        path = "embeddings." + hashlib.sha256(sequences.tostring()).hexdigest()
+        if path in self.memoizer:
+            return self.memoizer[path]
+        embeddings = np.array([self.embed_one(sequences[k]) for k in range(sequences.shape[0])])
+        self.memoizer[path] = embeddings
+        return embeddings
+
+    def embed_one(self, sequence):
         raise NotImplemented
 
 

@@ -1,3 +1,5 @@
+__author__ = "Benjamin Devillers (bdvllrs)"
+
 import numpy as np
 from kernels.default import Kernel
 
@@ -9,22 +11,22 @@ class SpectrumKernel(Kernel):
     Inspired from slide 55 of http://members.cbio.mines-paristech.fr/~jvert/talks/060727mlss/mlss.pdf
     """
 
-    def __init__(self, length=3):
-        super(SpectrumKernel, self).__init__()
+    def __init__(self, memoize_conf, length=3):
+        super(SpectrumKernel, self).__init__(memoize_conf)
         self.length = length
-        self.possible_numples = {}
+        self.possible_nuples = {}
 
     def add_nuples(self, sequence):
         for k in range(0, len(sequence) - (self.length - 1)):
             nuple = sequence[k:k + self.length]
-            if nuple in self.possible_numples.keys():
-                self.possible_numples[nuple] += 1
+            if nuple in self.possible_nuples.keys():
+                self.possible_nuples[nuple] += 1
             else:
-                self.possible_numples[nuple] = 1
-        return self.possible_numples
+                self.possible_nuples[nuple] = 1
+        return self.possible_nuples
 
     def embed_one(self, sequence):
-        nuples = {nuple: k for k, nuple in enumerate(self.possible_numples.keys())}
+        nuples = {nuple: k for k, nuple in enumerate(self.possible_nuples.keys())}
         vec = np.zeros(len(nuples.keys()))
         for k in range(0, len(sequence) - (self.length - 1)):
             nuple = sequence[k:k + self.length]
@@ -33,10 +35,13 @@ class SpectrumKernel(Kernel):
         return vec
 
     def embed(self, sequences):
-        if self.possible_numples == {}:
+        if "nuples" in self.memoizer:
+            self.possible_nuples = self.memoizer["nuples"]
+        elif self.possible_nuples == {}:
             for sequence in sequences:
                 self.add_nuples(sequence)
-        return np.array([self.embed_one(sequences[k]) for k in range(sequences.shape[0])])
+            self.memoizer["nuples"] = self.possible_nuples
+        return super(SpectrumKernel, self).embed(sequences)
 
     # def apply(self, embed1, embed2):
     #     total = 0

@@ -10,8 +10,8 @@ __all__ = ['MismatchKernel']
 class MismatchKernel(Kernel):
 
 
-    def __init__(self, length = 3, n_sample= 7):
-        super(MismatchKernel, self).__init__()
+    def __init__(self, memoize_conf, length = 3, n_sample= 7):
+        super(MismatchKernel, self).__init__(memoize_conf)
         self.length = length
         self.n_sample = n_sample
         self.possible_numples = {}

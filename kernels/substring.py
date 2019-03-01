@@ -20,8 +20,8 @@ class SubstringKernel(Kernel):
     partially inspired from https://github.com/timshenkao/StringKernelSVM/blob/master/stringSVM.py
     """
 
-    def __init__(self, length=3, decay_param=0.05):
-        super(SubstringKernel, self).__init__()
+    def __init__(self, memoize_conf, length=3, decay_param=0.05):
+        super(SubstringKernel, self).__init__(memoize_conf)
         self.length = length
         self.decay_param = decay_param
         self.MEMOIZER_AUX = {}

@@ -1,3 +1,5 @@
+__author__ = "Benjamin Devillers (bdvllrs)"
+
 import numpy as np
 import cvxopt
 from sklearn import svm  # Not used in the challenge, only for testing purposes.

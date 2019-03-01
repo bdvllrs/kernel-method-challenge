@@ -2,6 +2,28 @@
 
 Kaggle challenge on DNA sequence classification for Kernel Methods for Machine Learning Course.
 
+## Memoizer
+To improve performance, the class `utils.Memoizer` is used to save data to disk. The kernel have an instance in the `memoizer`
+property. (Inside a kernel class `self.memoizer` accesses the data).
+
+Some examples we suppose that we are in a kernel class and have access to `self.memoizer`
+```python
+self.memoizer["test.test2"] = [[1, 2, 3], [4, 5, 6]]  # save data in the storage
+"test.test2" in self.memoizer  # test if "test.test2" key is in the memoizer
+a = self.memoizer["test.test2"]  # Get values
+```
+
+The memoizer is saved onto the disk at the end of the `main.py` script.
+
+Tip to save something depending on the data: use a hash!
+```python
+import hashlib
+
+hash = hashlib.sha256(list_of_data.tostring()).hexdigest()
+```
+
+Examples in the default and Spectrum kernel.
+
 ## Kernels
 Classes extending from `kernels.Kernel`.
 
