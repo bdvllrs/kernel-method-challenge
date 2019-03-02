@@ -35,15 +35,7 @@ class Memoizer:
         """
         if self._MEMOIZER is None:
             self.load()
-        path = path.split(".")
-        store = self._MEMOIZER
-        for p in path[:-1]:
-            if p in store.keys():
-                store = store[p]
-            else:
-                store[p] = {}
-                store = store[p]
-        store[path[-1]] = value
+        self._MEMOIZER[path] = value
 
     def __setitem__(self, key, value):
         self.add(key, value)
@@ -57,14 +49,9 @@ class Memoizer:
         """
         if self._MEMOIZER is None:
             self.load()
-        path = path.split(".")
-        store = self._MEMOIZER
-        for p in path:
-            if p in store.keys():
-                store = store[p]
-            else:
-                return default
-        return store
+        if path in self._MEMOIZER.keys():
+            return self._MEMOIZER[path]
+        return default
 
     def __getitem__(self, key):
         return self.get(key)
@@ -75,14 +62,9 @@ class Memoizer:
         """
         if self._MEMOIZER is None:
             self.load()
-        path = path.split(".")
-        store = self._MEMOIZER
-        for p in path:
-            if p in store.keys():
-                store = store[p]
-            else:
-                return False
-        return True
+        if path in self._MEMOIZER.keys():
+            return True
+        return False
 
     def __contains__(self, item):
         return self.is_in(item)

@@ -87,7 +87,7 @@ class Kernel:
         return embeddings
 
     def embed_one(self, sequence):
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class OneHotKernel(Kernel):
