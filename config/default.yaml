@@ -15,7 +15,7 @@ submissions:
   path: relative/path/to/submission/folder/
 
 kernels:
-  kernel: onehot # in ["onehot", "spectrum"]
+  kernel: onehot # in ["onehot", "spectrum", "mismatch", "substring", "local-alignment"]
   memoize:
     path: relative/path/to/memoized/data/
 

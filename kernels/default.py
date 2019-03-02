@@ -45,13 +45,13 @@ class Kernel:
         if "gram.{}.{}".format(hash_2, hash_1) in self.memoizer:
             print('Using memoized data.')
             path = "gram.{}.{}".format(hash_2, hash_1)
-            return self.memoizer[path].transpose()
-        gram = np.array([[self.apply(x, y) for x in data_1] for y in data_2])
+            return self.memoizer[path]
+        gram = np.array([[self.apply(x, y, i, j) for i, x in enumerate(data_1)] for j, y in enumerate(data_2)])
         self.memoizer["gram.{}.{}".format(hash_1, hash_2)] = gram
 
         return gram
 
-    def apply(self, embed1, embed2):
+    def apply(self, embed1, embed2, idx1, idx2):
         """
         Returns the value of K(embed1, embed2)
         """

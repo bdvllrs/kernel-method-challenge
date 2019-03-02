@@ -75,7 +75,7 @@ def split_train_val(data, labels, ratio):
 
 def get_kernel(conf) -> kernels.Kernel:
     kernel = conf.kernel.lower()
-    assert kernel in ['onehot', 'spectrum', "mismatch", "substring"], "Unknown requested kernel."
+    assert kernel in ['onehot', 'spectrum', "mismatch", "substring", "local-alignment"], "Unknown requested kernel."
 
     if kernel == "spectrum":
         default_args = {"length": 3}
@@ -89,6 +89,10 @@ def get_kernel(conf) -> kernels.Kernel:
         default_args = {"length": 3, "lambda_decay": 0.05}
         default_args.update(conf.args.values_())
         kernel = kernels.SubstringKernel(conf.memoize, default_args['length'])
+    elif kernel == "local-alignment":
+        default_args = {"beta": 0.5, "d": 1, "e": 11}
+        default_args.update(conf.args.values_())
+        kernel = kernels.LocalAlignmentKernel(conf.memoize, default_args['beta'], default_args['d'], default_args['e'])
     else:
         kernel = kernels.OneHotKernel(conf.memoize)
     kernel.set_args(conf.type, conf.gamma, conf.degree, conf.r)

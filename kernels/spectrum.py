@@ -43,7 +43,7 @@ class SpectrumKernel(Kernel):
             self.memoizer["nuples"] = self.possible_nuples
         return super(SpectrumKernel, self).embed(sequences)
 
-    # def apply(self, embed1, embed2):
+    # def apply(self, embed1, embed2, _, __):
     #     total = 0
     #     for embed in embed1.keys():
     #         if embed in embed2.keys():
