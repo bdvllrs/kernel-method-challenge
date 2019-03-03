@@ -7,6 +7,10 @@ __all__ = ['LocalAlignmentKernel']
 
 
 class LocalAlignmentKernel(Kernel):
+    """
+    Local Alignment Kernel.
+    Inspired from http://members.cbio.mines-paristech.fr/~jvert/publi/04kmcbbook/saigo.pdf.
+    """
 
     def __init__(self, memoize_conf, beta, d, e):
         """
@@ -79,7 +83,8 @@ class LocalAlignmentKernel(Kernel):
 
         val = (1 + self.get_X2(size, size, embed1, embed2)
                + self.get_Y2(size, size, embed1, embed2) + self.get_M(size, size, embed1, embed2))
-        print(val)
+        val = 1 / self.beta * np.log(val)  # resole diagonal dominance issue
+        # print(val)
         return val
 
     def embed(self, sequences):
