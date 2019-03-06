@@ -26,8 +26,14 @@ kernels:
   args: {}
 
 
+
 classifiers:
   classifier: svm # in ["svm", "logistic-regression"]
   args:
     C: 1
     solver: qp  # in ["qp", "sklearn"]
+# TODO:
+# Gridsearch the parameter, same parameters as args.
+#  gridsearch:
+#    - C: {min: 0.5, max: 15, len: 50, type: linear}  # define it like a linspace or logspace (type dans ['linear', 'log'])
+#    - C: [0.1, 0.5, 0.9]  # or directly a list of values

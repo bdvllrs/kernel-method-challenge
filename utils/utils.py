@@ -90,7 +90,7 @@ def get_kernel(conf) -> kernels.Kernel:
         default_args.update(conf.args.values_())
         kernel = kernels.SubstringKernel(conf.memoize, default_args['length'])
     elif kernel == "local-alignment":
-        default_args = {"beta": 0.5, "d": 1, "e": 11}
+        default_args = {"beta": 0.05, "d": 1, "e": 11}
         default_args.update(conf.args.values_())
         kernel = kernels.LocalAlignmentKernel(conf.memoize, default_args['beta'], default_args['d'], default_args['e'])
     else:

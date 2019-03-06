@@ -1,6 +1,7 @@
 import numpy as np
 import hashlib
 from utils.memoizer import Memoizer
+from tqdm import tqdm
 
 __all__ = ['Kernel', 'OneHotKernel']
 
@@ -33,6 +34,7 @@ class Kernel:
             data_1: array of embeddings
             data_2: (optional) array of embeddings 2. Default: data_2 = data_1.
         """
+        is_same_data = data_2 is None
         if data_2 is None:
             data_2 = data_1
         # Get hashes for memoization
@@ -46,7 +48,17 @@ class Kernel:
             print('Using memoized data.')
             path = "gram.{}.{}".format(hash_2, hash_1)
             return self.memoizer[path]
-        gram = np.array([[self.apply(x, y, i, j) for i, x in enumerate(data_1)] for j, y in enumerate(data_2)])
+        gram = np.ones((len(data_1), len(data_2))) * -1
+        print("Computing gram...")
+        with tqdm(total=len(data_1) * len(data_2)) as progress_bar:
+            for j, y in enumerate(data_2):
+                for i, x in enumerate(data_1):
+                    if not is_same_data or j <= i:
+                        gram[j, i] = self.apply(x, y, i, j)
+                        progress_bar.update(1)
+                    if is_same_data and j <= i:
+                        gram[i, j] = gram[j, i]
+                        progress_bar.update(1)
         self.memoizer["gram.{}.{}".format(hash_1, hash_2)] = gram
 
         return gram
