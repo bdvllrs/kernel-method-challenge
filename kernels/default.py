@@ -48,7 +48,7 @@ class Kernel:
             print('Using memoized data.')
             path = "gram.{}.{}".format(hash_2, hash_1)
             return self.memoizer[path]
-        gram = np.ones((len(data_1), len(data_2))) * -1
+        gram = np.ones((len(data_2), len(data_1))) * -1
         print("Computing gram...")
         with tqdm(total=len(data_1) * len(data_2)) as progress_bar:
             for j, y in enumerate(data_2):
