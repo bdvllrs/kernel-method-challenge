@@ -10,38 +10,22 @@ import classifiers
 __all__ = ['get_classifier', 'get_kernel', 'get_sets', 'kfold', 'save_submission', 'split_train_val']
 
 
-def get_sets(path, slug="tr", merge=False, only=None):
+def get_sets(path, slug="tr", idx=0):
     """
     Get data
     Args:
         path: path to data
         slug: tr for training and te for testing
-        merge: if True, merge all three datafiles
-        only: If given, between 0 and 2, only use the requested dataset.
+        idx: between 0 and 2, only use the requested dataset.
     """
     path = os.path.abspath(os.path.join(os.curdir, path))
-    datasets = []
-    labels = []
-    ids = []
-    for k in range(3):
-        data = pd.read_csv(os.path.join(path, "X{}{}.csv".format(slug, k)))
-        datasets.append(data['seq'].values)
-        ids.append(data['Id'])
-        if slug == "tr":
-            labels.append(pd.read_csv(os.path.join(path, "Y{}{}.csv".format(slug, k)))['Bound'].values)
-    if merge:
-        datasets = np.concatenate(datasets)
-        ids = np.concatenate(ids)
-        if slug == "tr":
-            labels = np.concatenate(labels)
-    elif only is not None:
-        datasets = datasets[only]
-        ids = ids[only]
-        if slug == "tr":
-            labels = labels[only]
+    data = pd.read_csv(os.path.join(path, "X{}{}.csv".format(slug, idx)))
+    dataset = data['seq'].values
+    ids = data['Id']
     if slug == "tr":
-        return datasets, labels
-    return datasets, ids
+        labels = pd.read_csv(os.path.join(path, "Y{}{}.csv".format(slug, idx)))['Bound'].values
+        return dataset, labels
+    return dataset, ids
 
 
 def save_submission(conf, predictions, test_ids, accuracy):

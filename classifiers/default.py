@@ -9,6 +9,9 @@ class Classifier:
         self.alpha = None
         self.training_data = None
 
+    def set_support_vectors(self):
+        pass
+
     def fit(self, data, labels):
         """
         Fit the data.

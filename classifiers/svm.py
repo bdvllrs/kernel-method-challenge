@@ -12,6 +12,15 @@ class SVMClassifier(Classifier):
         self.C = C
         self.solver = solver
         self.sklearn_clf = None
+        self.all_alphas = []
+
+    def set_support_vectors(self):
+        self.alpha = np.mean(self.all_alphas, axis=0)
+        self.all_alphas = []
+        not_null = np.abs(self.alpha) > 1e-4
+        self.alpha = self.alpha[not_null]
+        print("{} support vectors found.".format(self.alpha.shape[0]))
+        self.training_data = self.training_data[not_null]
 
     def predict(self, data):
         if self.solver == "sklearn" and self.sklearn_clf is not None:
@@ -34,11 +43,7 @@ class SVMClassifier(Classifier):
         G = cvxopt.matrix(np.concatenate([np.diag(y), -np.diag(y)], axis=0))
         h = cvxopt.matrix(np.concatenate([self.C * np.ones_like(y), np.zeros_like(y)]))
         self.alpha = np.array(cvxopt.solvers.qp(P, q, G, h)['x']).reshape(-1)
-        # Only support vectors
-        not_null = np.abs(self.alpha) > 1e-4
-        self.alpha = self.alpha[not_null]
-        print("{} support vectors found.".format(self.alpha.shape[0]))
-        self.training_data = self.training_data[not_null]
+        self.all_alphas.append(self.alpha.copy())
 
     def fit_sklearn(self, data, labels):
         """
