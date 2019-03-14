@@ -36,7 +36,7 @@ def save_submission(conf, predictions, test_ids, accuracy):
     for k, idx in enumerate(test_ids):
         ordered_pred[idx] = predictions[k]
     date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-    filename = "submission_{}_kernel_{}_val-acc_{}_{}".format(method, kernel, accuracy, date)
+    filename = f"submission_{method}_kernel_{kernel}_val-acc_{accuracy}_{date}"
     path_csv = os.path.abspath(os.path.join(os.curdir, path, filename + ".csv"))
     path_yaml = os.path.abspath(os.path.join(os.curdir, path, filename + ".yaml"))
     with open(path_csv, 'w') as f:

@@ -17,8 +17,9 @@ class SVMClassifier(Classifier):
     def set_support_vectors(self):
         self.alpha = np.mean(self.all_alphas, axis=0)
         self.all_alphas = []
-        n = int(0.5 * len(self.alpha))
-        not_null = np.argsort(np.abs(self.alpha))[-n:]
+        # n = int(0.8 * len(self.alpha))
+        # not_null = np.argsort(np.abs(self.alpha))[-n:]
+        not_null = np.abs(self.alpha) > 1e-3
         self.alpha = self.alpha[not_null]
         print("{} support vectors found.".format(self.alpha.shape[0]))
         self.training_data = self.training_data[not_null]

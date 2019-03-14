@@ -34,10 +34,13 @@ for idx in range(3):
         if ratio < 1:
             print("Evaluating...")
             results = clf.evaluate(val_data, val_labels)
+            print(clf.predict(val_data))
             accuracies.append(results["Accuracy"])
             print(results)
 
     clf.set_support_vectors()
+    print("Evaluation on train")
+    print(clf.evaluate(train_data, train_y))
 
     print("Predicting...")
     predictions.extend(list(clf.predict(test_data)))
