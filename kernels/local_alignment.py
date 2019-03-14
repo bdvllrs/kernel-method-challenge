@@ -68,7 +68,7 @@ class LocalAlignmentKernel(Kernel):
             self.S[key] = np.log(couple_frequencies[key] / (frequencies[key[0]] * frequencies[key[1]]))
 
     def apply(self, x1, x2, _, __):
-        size = len(x1) + 1
+        size = 20
         M = np.zeros((size, size))
         X = np.zeros((size, size))
         Y = np.zeros((size, size))
