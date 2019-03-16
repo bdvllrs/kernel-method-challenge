@@ -27,8 +27,13 @@ class Config:
                     with open(os.path.join(self.__path, config), "rb") as config_file:
                         self.__data = update_config(self.__data, yaml.load(config_file))
 
-    def set_(self, key, value):
-        self.__data[key] = value
+    def set_(self, path, value):
+        keys = path.split(".")
+        if len(keys) == 1:
+            self.__data[keys[0]] = value
+        else:
+            key = keys.pop(0)
+            self[key].set_(".".join(keys), value)
 
     def values_(self):
         return self.__data
@@ -38,10 +43,20 @@ class Config:
         with open(file, 'w') as f:
             yaml.dump(self.__data, f)
 
+    def get_(self, path):
+        keys = path.split(".")
+        cfg = self
+        for key in keys:
+            cfg = cfg[key]
+        return cfg
+
     def __getattr__(self, item):
         if type(self.__data[item]) == dict:
             return Config(config=self.__data[item])
         return self.__data[item]
 
     def __getitem__(self, item):
+        if type(self.__data[item]) == dict:
+            return Config(config=self.__data[item])
         return self.__data[item]
+

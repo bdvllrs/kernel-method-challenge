@@ -27,10 +27,16 @@ kernels:
 classifiers:
   classifier: svm # in ["svm", "logistic-regression"]
   args:
-    C: 1
+    C:
+      gridsearch: {min: 0.5, max: 1.5, num: 5, type: linear}
     solver: qp  # in ["qp", "sklearn"]
-# TODO:
-# Gridsearch the parameter, same parameters as args.
-#  gridsearch:
-#    - C: {min: 0.5, max: 15, len: 50, type: linear}  # define it like a linspace or logspace (type dans ['linear', 'log'])
-#    - C: [0.1, 0.5, 0.9]  # or directly a list of values
+
+
+# Gridsearch:
+# instead of a value, add the keyword "gridsearch" and a list to do the gridsearch over
+# gridsearch: [0, 1, 2]
+# You can also specify
+# {min: 0, max: 15, num: 10, type: linear}
+# To create a np.linspace(0, 15, 10) or
+# {min: 0, max: 5, num: 10, type: log}
+# To create a np.logspace(0, 5, 10)
