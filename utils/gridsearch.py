@@ -28,13 +28,13 @@ def walk_dict(data: dict, current_path=""):
 
 class GridSearch:
     def __init__(self, config):
-        self.params = {}
-        self.all_states = []
+        self.params = [{}, {}, {}]
+        self.all_states = [[], [], []]
         self.config = config
         self.load_from_config()
         self.set_all_states()
 
-    def add(self, key, value):
+    def add(self, set, key, value):
         # If it's a dict, we transform it into a list
         if type(value) == dict:
             list_type = value["type"] if "type" in value.keys() else "linear"
@@ -45,37 +45,43 @@ class GridSearch:
                 value = np.logspace(value["min"], value["max"], value["num"])
             else:  # linear
                 value = np.linspace(value["min"], value["max"], value["num"])
-        self.params[key] = value
+        self.params[set][key] = value
 
     def load_from_config(self):
         """
         Add gridsearch parameters from config
         """
-        cfg = self.config.values_()
-        for key, val in walk_dict(cfg):
-            self.add(key, val)
+        for i in range(3):
+            cfg = self.config[f"set{i}"].values_()
+            for key, val in walk_dict(cfg):
+                self.add(i, key, val)
 
     def set_all_states(self):
-        keys = list(self.params.keys())
-        n = len(keys)
-        lists = self.params.values()
-        for element in list_product(*lists):
-            self.all_states.append({keys[k]: element[k] for k in range(n)})
+        for i in range(3):
+            keys = list(self.params[i].keys())
+            n = len(keys)
+            lists = self.params[i].values()
+            for element in list_product(*lists):
+                self.all_states[i].append({keys[k]: element[k] for k in range(n)})
 
-    def states(self):
+    def states(self, i):
         """
         Generator of the gridsearch and returns message of what has been set.
         """
-        print(f"Gridsearch: {len(self.all_states)} iterations to perform.")
-        for k, state in enumerate(self.all_states):
-            print(f"\n@@@@@@@ Gridsearch step {k + 1} over {len(self.all_states)}: \n")
-            print("@@@@@@@ Start model with values: \n")
-            self.print_state(state, "@@@@@@@")
-            yield state
+        if not self.all_states[i]:
+            yield []
+        else:
+            print(f"Gridsearch: {len(self.all_states[i])} iterations to perform.")
+            for k, state in enumerate(self.all_states[i]):
+                print(f"\n@@@@@@@ Gridsearch step {k + 1} over {len(self.all_states[i])}: \n")
+                print("@@@@@@@ Start model with values: \n")
+                self.print_state(state, i, "@@@@@@@")
+                yield state
 
-    def print_state(self, state, prefix=""):
+    def print_state(self, state, i=None, prefix=""):
         text = ""
         for key, val in state.items():
-            self.config.set_(key, val)
+            if i is not None:
+                self.config[f"set{i}"].set_(key, val)
             text += f"{prefix} - {key}: {val}\n"
         print(text)

@@ -11,25 +11,45 @@ submissions:
   save: Yes  # If Yes, submissions and associated config file are saved at the given path.
   path: relative/path/to/submission/folder/
 
-kernels:
-  kernel: onehot # in ["onehot", "spectrum", "mismatch", "substring", "local-alignment"]
-  memoize:
-    path: relative/path/to/memoized/data/
+global:
+  kernels:
+    kernel: onehot # in ["onehot", "spectrum", "mismatch", "substring", "local-alignment"]
+    memoize:
+      path: relative/path/to/memoized/data/
 
-  type: linear # in ["linear", "polynomial", "gaussian", "sigmoid"]
-  gamma: auto # parameter for polynomial, gaussian and sigmoid
-  degree: 2 # if polynomial, degree of the polynomial
-  r: 0  # added constant for polynomial and sigmoid.
-  args: {}
+    type: linear # in ["linear", "polynomial", "gaussian", "sigmoid"]
+    gamma: auto # parameter for polynomial, gaussian and sigmoid
+    degree: 2 # if polynomial, degree of the polynomial
+    r: 0  # added constant for polynomial and sigmoid.
+    args: {}
 
 
 
-classifiers:
-  classifier: svm # in ["svm", "logistic-regression"]
-  args:
-    C:
-      gridsearch: {min: 0.5, max: 1.5, num: 5, type: linear}
-    solver: qp  # in ["qp", "sklearn"]
+  classifiers:
+    classifier: svm # in ["svm", "logistic-regression"]
+    args:
+      C:
+        gridsearch: {min: 0.5, max: 1.5, num: 5, type: linear}
+      solver: qp  # in ["qp", "sklearn"]
+
+# The default values are the one defined in global.
+# Here are only the specific values for the 3 set which overrides the default.
+# Gridsearch can be used here and is applied independently for each.
+set0: {}
+
+set1: {}
+
+set2: {}
+
+# Example changes for set0, this will only change kernels.args.length and classifiers.args.C.
+#set0:
+#  kernels:
+#    args:
+#      length: 3
+#  classifiers:
+#    args:
+#      C: 2
+
 
 
 # Gridsearch:

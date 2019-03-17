@@ -50,6 +50,10 @@ class Config:
             cfg = cfg[key]
         return cfg
 
+    def rename_(self, cur_name, new_name):
+        self.__data[new_name] = self.__data[cur_name]
+        del self.__data[cur_name]
+
     def __getattr__(self, item):
         if type(self.__data[item]) == dict:
             return Config(config=self.__data[item])
@@ -59,4 +63,7 @@ class Config:
         if type(self.__data[item]) == dict:
             return Config(config=self.__data[item])
         return self.__data[item]
+
+    def __str__(self):
+        return self.__data
 

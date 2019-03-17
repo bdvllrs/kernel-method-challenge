@@ -30,13 +30,11 @@ def get_sets(path, slug="tr", idx=0):
 
 def save_submission(conf, predictions, test_ids, accuracy):
     path = conf.submissions.path
-    method = conf.classifiers.classifier
-    kernel = conf.kernels.kernel
     ordered_pred = np.zeros_like(predictions)
     for k, idx in enumerate(test_ids):
         ordered_pred[idx] = predictions[k]
     date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-    filename = f"submission_{method}_kernel_{kernel}_val-acc_{accuracy}_{date}"
+    filename = f"submission_val-acc_{accuracy}_{date}"
     path_csv = os.path.abspath(os.path.join(os.curdir, path, filename + ".csv"))
     path_yaml = os.path.abspath(os.path.join(os.curdir, path, filename + ".yaml"))
     with open(path_csv, 'w') as f:
