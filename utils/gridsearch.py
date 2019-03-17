@@ -17,11 +17,19 @@ def walk_dict(data: dict, current_path=""):
         [("test", [0, 1, 2]), ("one.two", [4, 5, 6])]
     """
     keys = []
-    for key, val in data.items():
+    if type(data) == list:
+        # returns couples of the form ("[k]", val)
+        # useful for the config class where you can access a list element with the path
+        # "data1.data2.[2].item"
+        # for config.data1.data2[2].item
+        elems = [(f"[{k}]", x) for k, x in list(enumerate(data))]
+    else:
+        elems = data.items()
+    for key, val in elems:
         if key == "gridsearch":
             keys.append((current_path[:-1], val))
         else:
-            if type(val) == dict:
+            if type(val) in [dict, list]:
                 keys.extend(walk_dict(val, f"{current_path}{key}."))
     return keys
 

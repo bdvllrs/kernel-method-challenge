@@ -3,7 +3,7 @@ import hashlib
 from utils.memoizer import Memoizer
 from tqdm import tqdm
 
-__all__ = ['Kernel', 'OneHotKernel']
+__all__ = ['Kernel', 'OneHotKernel', 'SumKernel']
 
 
 class Kernel:
@@ -118,3 +118,29 @@ class OneHotKernel(Kernel):
 
     def embed(self, sequences):
         return np.array([OneHotKernel.to_onehot(sequences[k]) for k in range(sequences.shape[0])])
+
+
+class SumKernel(Kernel):
+    def __init__(self, memoize_conf, kernels, coefs):
+        """
+        Args:
+            memoize_conf:  conf for memoization
+            kernels: list of all instaciated kernels.
+            coefs: Coeficients to combine the kernels
+        """
+        super(SumKernel, self).__init__(memoize_conf)
+        self.kernels = kernels
+        self.coefs = coefs
+
+    def embed(self, sequences):
+        embeds = []
+        for kernel in self.kernels:
+            embeds.append(kernel.embed(sequences))
+        embeddinds = [[embeds[k][i] for k in range(len(self.kernels))] for i in range(len(sequences))]
+        return np.array(embeddinds)
+
+    def apply(self, embed1, embed2, idx1, idx2):
+        result = 0
+        for k in range(len(embed1)):
+            result += self.coefs[k] * self.kernels[k].apply(embed1[k], embed2[k], idx1, idx2)
+        return result

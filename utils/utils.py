@@ -56,28 +56,39 @@ def split_train_val(data, labels, ratio):
 
 
 def get_kernel(conf) -> kernels.Kernel:
-    kernel = conf.kernel.lower()
-    assert kernel in ['onehot', 'spectrum', "mismatch", "substring", "local-alignment"], "Unknown requested kernel."
+    all_kernels = conf.kernels.values_()
+    list_kernels = []
+    list_coefs = []
+    for k in range(len(all_kernels)):
+        kernel = all_kernels[k]["name"]
+        coef = conf.coefs[k]
+        assert coef >= 0, f"Coefficient for kernel {k + 1} must be positive."
+        list_coefs.append(coef)
+        kernel_conf = conf.kernels[k]
+        assert kernel in ['onehot', 'spectrum', "mismatch", "substring", "local-alignment"], "Unknown requested kernel."
 
-    if kernel == "spectrum":
-        default_args = {"length": 3}
-        default_args.update(conf.args.values_())
-        kernel = kernels.SpectrumKernel(conf.memoize, default_args['length'])
-    elif kernel == "mismatch":
-        default_args = {"length": 3}
-        default_args.update(conf.args.values_())
-        kernel = kernels.MismatchKernel(conf.memoize, default_args['length'])
-    elif kernel == "substring":
-        default_args = {"length": 3, "lambda_decay": 0.05}
-        default_args.update(conf.args.values_())
-        kernel = kernels.SubstringKernel(conf.memoize, default_args['length'])
-    elif kernel == "local-alignment":
-        default_args = {"beta": 0.05, "d": 1, "e": 11}
-        default_args.update(conf.args.values_())
-        kernel = kernels.LocalAlignmentKernel(conf.memoize, default_args['beta'], default_args['d'], default_args['e'])
-    else:
-        kernel = kernels.OneHotKernel(conf.memoize)
-    kernel.set_args(conf.type, conf.gamma, conf.degree, conf.r)
+        if kernel == "spectrum":
+            default_args = {"length": 3}
+            default_args.update(kernel_conf.args.values_())
+            kernel = kernels.SpectrumKernel(conf.memoize, default_args['length'])
+        elif kernel == "mismatch":
+            default_args = {"length": 3}
+            default_args.update(kernel_conf.args.values_())
+            kernel = kernels.MismatchKernel(conf.memoize, default_args['length'])
+        elif kernel == "substring":
+            default_args = {"length": 3, "lambda_decay": 0.05}
+            default_args.update(kernel_conf.args.values_())
+            kernel = kernels.SubstringKernel(conf.memoize, default_args['length'])
+        elif kernel == "local-alignment":
+            default_args = {"beta": 0.05, "d": 1, "e": 11}
+            default_args.update(kernel_conf.args.values_())
+            kernel = kernels.LocalAlignmentKernel(conf.memoize, default_args['beta'], default_args['d'],
+                                                  default_args['e'])
+        else:
+            kernel = kernels.OneHotKernel(conf.memoize)
+        kernel.set_args(kernel_conf.type, kernel_conf.gamma, kernel_conf.degree, kernel_conf.r)
+        list_kernels.append(kernel)
+    kernel = kernels.SumKernel(conf.memoize, list_kernels, list_coefs)
     return kernel
 
 

@@ -13,17 +13,23 @@ submissions:
 
 global:
   kernels:
-    kernel: onehot # in ["onehot", "spectrum", "mismatch", "substring", "local-alignment"]
     memoize:
       path: relative/path/to/memoized/data/
+    coefs: [1, 0.5]
+    kernels: # Gets a list of kernels to sum over
+      - name: spectrum # in ["onehot", "spectrum", "mismatch", "substring", "local-alignment", "sum"]
+        type: linear # in ["linear", "polynomial", "gaussian", "sigmoid"]
+        gamma: auto # parameter for polynomial, gaussian and sigmoid
+        degree: 2 # if polynomial, degree of the polynomial
+        r: 0  # added constant for polynomial and sigmoid.
+        args: {}
 
-    type: linear # in ["linear", "polynomial", "gaussian", "sigmoid"]
-    gamma: auto # parameter for polynomial, gaussian and sigmoid
-    degree: 2 # if polynomial, degree of the polynomial
-    r: 0  # added constant for polynomial and sigmoid.
-    args: {}
-
-
+      - name: spectrum # in ["onehot", "spectrum", "mismatch", "substring", "local-alignment", "sum"]
+        type: linear # in ["linear", "polynomial", "gaussian", "sigmoid"]
+        gamma: auto # parameter for polynomial, gaussian and sigmoid
+        degree: 2 # if polynomial, degree of the polynomial
+        r: 0  # added constant for polynomial and sigmoid.
+        args: {}
 
   classifiers:
     classifier: svm # in ["svm", "logistic-regression"]
