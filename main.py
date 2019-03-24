@@ -1,7 +1,8 @@
 from copy import deepcopy
 from numpy import mean
-from utils import Config, get_classifier, get_set, get_kernel, split_train_val, save_submission, GridSearch
-from utils.config import update_config
+from utils.config import Config, update_config
+from utils.gridsearch import GridSearch
+from utils.utils import get_kernel, get_classifier, get_set, save_submission, kfold, split_train_val
 
 glob_cfg = Config('config')
 
@@ -43,24 +44,18 @@ for set_idx in range(3):
         clf = get_classifier(config.classifiers.classifier, kernel, config.classifiers.args.values_())
 
         ratio = 1 - glob_cfg.data.validation_set.ratio
-        for i in range(glob_cfg.data.bagging):
-            print(f"\nBagging step {i + 1}.")
-            if ratio < 1:
-                train_data, train_y, val_data, val_labels = split_train_val(train_set, train_labels, ratio=ratio)
-            else:
-                train_data, train_y = train_set, train_labels
 
-            print("\nFitting...")
-            print(clf.fit(train_data, train_y))
+        print("\nFitting...")
+        clf.fit(train_set, train_labels, ratio, bagging=glob_cfg.data.bagging)
 
-            if ratio < 1:
-                print("\nEvaluating...")
-                results = clf.evaluate(val_data, val_labels)
-                print(clf.predict(val_data))
-                accuracies.append(results["Accuracy"])
-                print("\n Val evaluation:", results)
+        train_data, train_y, val_data, val_labels, _, _ = split_train_val(train_set, train_labels, ratio)
 
-        clf.set_support_vectors()
+        print("\nEvaluating...")
+        results = clf.evaluate(val_data, val_labels)
+        print(clf.predict(val_data))
+        accuracies.append(results["Accuracy"])
+        print("\n Val evaluation:", results)
+
         eval_train = clf.evaluate(train_data, train_y)
         print("\nEvaluation on train:", eval_train)
 

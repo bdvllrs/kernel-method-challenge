@@ -12,11 +12,15 @@ class Classifier:
     def set_support_vectors(self):
         pass
 
-    def fit(self, data, labels):
+    def fit(self, data, labels, split_ratio=1, **params):
         """
         Fit the data.
         """
         raise NotImplemented
+
+    def reset(self):
+        self.alpha = None
+        self.training_data = None
 
     def predict(self, data):
         """

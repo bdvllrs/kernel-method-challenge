@@ -1,3 +1,3 @@
-from classifiers.default import Classifier
-from classifiers.svm import SVMClassifier
-from classifiers.regression import LogisticRegressionClassifier
+from classifiers.default import *
+from classifiers.svm import *
+from classifiers.regression import *
