@@ -1,6 +1,6 @@
 from copy import deepcopy
 from numpy import mean
-from utils import Config, get_classifier, get_sets, get_kernel, split_train_val, save_submission, GridSearch
+from utils import Config, get_classifier, get_set, get_kernel, split_train_val, save_submission, GridSearch
 from utils.config import update_config
 
 glob_cfg = Config('config')
@@ -17,16 +17,16 @@ total_accuracy = []
 all_predictions = []
 all_ids = []
 
-for idx in range(3):
-    print(f"\nDataset {idx + 1}.")
+for set_idx in range(3):
+    print(f"\nDataset {set_idx + 1}.")
 
     best_accuracy_set = 0
     best_predictions_set = None
     best_ids_set = None
     best_state_set = {}
 
-    for state in gridsearch.states(idx):
-        config = glob_cfg[f"set{idx}"]
+    for hparam in gridsearch.hparams(set_idx):
+        config = glob_cfg[f"set{set_idx}"]
 
         kernel = get_kernel(config.kernels)
 
@@ -34,11 +34,10 @@ for idx in range(3):
         accuracies = []
         ids = []
 
-        train_set, train_labels = get_sets(glob_cfg.data.path, "tr", idx=idx)
-        test_data, test_ids = get_sets(glob_cfg.data.path, "te", idx=idx)
+        train_set, train_labels = get_set(glob_cfg.data.path, "tr", idx=set_idx)
+        test_data, test_ids = get_set(glob_cfg.data.path, "te", idx=set_idx)
 
         train_set = kernel.embed(train_set)
-
         test_data = kernel.embed(test_data)
 
         clf = get_classifier(config.classifiers.classifier, kernel, config.classifiers.args.values_())
@@ -73,7 +72,7 @@ for idx in range(3):
         if accuracy > best_accuracy_set or best_predictions_set is None:
             best_accuracy_set, best_predictions_set = accuracy, predictions
             best_ids_set = ids
-            best_state_set = state
+            best_state_set = hparam
 
         kernel.memoizer.save()
 
@@ -81,8 +80,8 @@ for idx in range(3):
     all_predictions.extend(best_predictions_set)
     all_ids.extend(best_ids_set)
 
-    print(f"\n Best state found for set{idx} with values:")
-    gridsearch.print_state(best_state_set, idx)
+    print(f"\n Best state found for set{set_idx} with values:")
+    gridsearch.print_state(best_state_set, set_idx)
 
 
 if glob_cfg.submissions.save:

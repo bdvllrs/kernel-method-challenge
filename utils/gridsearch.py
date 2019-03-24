@@ -72,9 +72,9 @@ class GridSearch:
             for element in list_product(*lists):
                 self.all_states[i].append({keys[k]: element[k] for k in range(n)})
 
-    def states(self, i):
+    def hparams(self, i):
         """
-        Generator of the gridsearch and returns message of what has been set.
+        Generator of the gridsearch hyperparameters and returns message of what has been set.
         """
         if not self.all_states[i]:
             yield []

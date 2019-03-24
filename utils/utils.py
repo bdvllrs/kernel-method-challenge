@@ -7,10 +7,10 @@ import os
 import kernels
 import classifiers
 
-__all__ = ['get_classifier', 'get_kernel', 'get_sets', 'kfold', 'save_submission', 'split_train_val']
+__all__ = ['get_classifier', 'get_kernel', 'get_set', 'kfold', 'save_submission', 'split_train_val']
 
 
-def get_sets(path, slug="tr", idx=0):
+def get_set(path, slug="tr", idx=0):
     """
     Get data
     Args:
@@ -98,8 +98,7 @@ def get_classifier(classifier: str, kernel, args) -> classifiers.Classifier:
 
     if classifier == "svm":
         assert "C" in args.keys(), "`C` must be in config.classifiers.args for svm."
-        assert "solver" in args.keys(), "`solver` must be in config.classifiers.args for svm."
-        return classifiers.SVMClassifier(kernel, args['C'], args['solver'])
+        return classifiers.SVMClassifier(kernel, args['C'])
     elif classifier == "logistic-regression":
         assert "lambda" in args.keys(), "`lambda` must be in config.classifiers.args for logistic-regression."
         return classifiers.LogisticRegressionClassifier(kernel, args['lambda'])

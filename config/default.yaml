@@ -36,7 +36,6 @@ global:
     args:
       C:
         gridsearch: {min: 0.5, max: 1.5, num: 5, type: linear}
-      solver: qp  # in ["qp", "sklearn"]
 
 # The default values are the one defined in global.
 # Here are only the specific values for the 3 set which overrides the default.
