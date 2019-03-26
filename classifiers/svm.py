@@ -76,7 +76,7 @@ class SVMClassifier(Classifier):
             train_data, train_y, val_data, val_labels, train_mask, val_mask = utils.utils.split_train_val(data, labels, ratio=split_ratio)
 
             alpha = np.full_like(labels, np.nan, dtype=float)
-            alpha[train_mask] = self.fit_dual_with_intercept(train_data, train_y)
+            alpha[train_mask] = self.fit_dual(train_data, train_y)
             self.all_alphas.append(alpha)
         self.set_support_vectors()
 
