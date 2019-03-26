@@ -32,7 +32,7 @@ class LogisticRegressionClassifier(Classifier):
 
     def fit(self, data, labels, split_ratio=1, **params):
         train_data, train_y, val_data, val_labels, _, _ = utils.utils.split_train_val(data, labels, ratio=split_ratio)
-        self.training_data = train_data
+        self.support_vector = train_data
         n = train_data.shape[0]
         self.alpha = np.zeros(n, dtype=float)
         K = self.kernel(train_data).astype(float)

@@ -8,6 +8,7 @@ class Classifier:
         self.kernel = kernel
         self.alpha = None
         self.training_data = None
+        self.support_vectors = None
 
     def set_support_vectors(self):
         pass
@@ -21,6 +22,7 @@ class Classifier:
     def reset(self):
         self.alpha = None
         self.training_data = None
+        self.support_vectors = None
 
     def predict(self, data):
         """
@@ -28,8 +30,8 @@ class Classifier:
             data: DataFrame containing the data
         Returns: predicted labels for each row
         """
-        assert self.training_data is not None, "Use fit before predicting."
-        K = self.kernel(self.training_data, data)
+        assert self.support_vectors is not None, "Use fit before predicting."
+        K = self.kernel(self.support_vectors, data)
         f = np.sign(K @ self.alpha)  # in {-1, 0, 1}
         return np.round((f + 1) / 2).astype(int)  # convert into {0, 1}
 
@@ -42,7 +44,7 @@ class Classifier:
         """
         predictions = self.predict(data)
         return {
-            "MSE": metrics.mse(labels, predictions),
             "Accuracy": metrics.accuracy(labels, predictions),
-            # TODO: Add some other metrics like Recall, ...
+            "Recall": metrics.recall(labels, predictions),
+            "Precision": metrics.precision(labels, predictions),
         }

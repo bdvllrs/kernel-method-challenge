@@ -46,18 +46,9 @@ for set_idx in range(3):
         ratio = 1 - glob_cfg.data.validation_set.ratio
 
         print("\nFitting...")
-        clf.fit(train_set, train_labels, ratio, bagging=glob_cfg.data.bagging)
+        results = clf.fit(train_set, train_labels, ratio, bagging=glob_cfg.data.bagging)
 
-        train_data, train_y, val_data, val_labels, _, _ = split_train_val(train_set, train_labels, ratio)
-
-        print("\nEvaluating...")
-        results = clf.evaluate(val_data, val_labels)
-        print(clf.predict(val_data))
         accuracies.append(results["Accuracy"])
-        print("\n Val evaluation:", results)
-
-        eval_train = clf.evaluate(train_data, train_y)
-        print("\nEvaluation on train:", eval_train)
 
         print("\nPredicting...")
         predictions = list(clf.predict(test_data))
