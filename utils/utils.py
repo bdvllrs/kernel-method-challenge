@@ -45,7 +45,7 @@ def save_submission(conf, predictions, test_ids, accuracy):
 
 def split_train_val(data, labels, ratio):
     if ratio == 1:
-        return data, labels, [], [], None, None
+        return data, labels, [], []
     keys = np.arange(data.shape[0])
     np.random.shuffle(keys)
     last_key = int(ratio * data.shape[0])
@@ -53,7 +53,7 @@ def split_train_val(data, labels, ratio):
     train_labels = labels[keys[:last_key]]
     val_data = data[keys[last_key:]]
     val_labels = labels[keys[last_key:]]
-    return train_data, train_labels, val_data, val_labels, keys[:last_key], keys[last_key:]
+    return train_data, train_labels, val_data, val_labels
 
 
 def get_kernel(conf) -> kernels.Kernel:

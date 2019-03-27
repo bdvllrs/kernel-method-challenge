@@ -1,6 +1,5 @@
 __author__ = "Benjamin Devillers (bdvllrs)"
 
-
 import numpy as np
 from classifiers.default import Classifier
 import scipy.optimize as optim
@@ -30,13 +29,12 @@ class LogisticRegressionClassifier(Classifier):
         super(LogisticRegressionClassifier, self).__init__(kernel)
         self.lbd = lbd
 
-    def fit(self, data, labels, split_ratio=1, **params):
-        train_data, train_y, val_data, val_labels, _, _ = utils.utils.split_train_val(data, labels, ratio=split_ratio)
-        self.support_vector = train_data
-        n = train_data.shape[0]
+    def fit(self, data, labels):
+        self.support_vectors = data
+        n = data.shape[0]
         self.alpha = np.zeros(n, dtype=float)
-        K = self.kernel(train_data).astype(float)
-        y = np.array(2 * train_y - 1, dtype=float)  # to {-1, 1}
+        K = self.kernel(data).astype(float)
+        y = np.array(2 * labels - 1, dtype=float)  # to {-1, 1}
         lbd = self.lbd
 
         def objective_fn(u):

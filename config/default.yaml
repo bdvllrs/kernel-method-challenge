@@ -3,7 +3,6 @@
 # Change the values
 data:
   path: relative/path/to/data/folder/
-  bagging: 10
   validation_set:  # if kfold is No...
     ratio: 0.1  # 10 percent of the total data
 

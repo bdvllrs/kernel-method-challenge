@@ -13,7 +13,7 @@ class Classifier:
     def set_support_vectors(self):
         pass
 
-    def fit(self, data, labels, split_ratio=1, **params):
+    def fit(self, data, labels):
         """
         Fit the data.
         """
@@ -47,4 +47,5 @@ class Classifier:
             "Accuracy": metrics.accuracy(labels, predictions),
             "Recall": metrics.recall(labels, predictions),
             "Precision": metrics.precision(labels, predictions),
+            "Predictions": predictions
         }

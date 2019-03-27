@@ -45,8 +45,16 @@ for set_idx in range(3):
 
         ratio = 1 - glob_cfg.data.validation_set.ratio
 
+        train_data, train_y, val_data, val_labels = split_train_val(train_set, train_labels, ratio=ratio)
+
         print("\nFitting...")
-        results = clf.fit(train_set, train_labels, ratio, bagging=glob_cfg.data.bagging)
+        clf.fit(train_data, train_y)
+
+        print("\nEvaluating...")
+        results = clf.evaluate(val_data, val_labels)
+        print("\n Val evaluation:", results)
+        eval_train = clf.evaluate(train_data, train_y)
+        print("\nEvaluation on train:", eval_train)
 
         accuracies.append(results["Accuracy"])
 
@@ -68,7 +76,6 @@ for set_idx in range(3):
 
     print(f"\n Best state found for set{set_idx} with values:")
     gridsearch.print_state(best_state_set, set_idx)
-
 
 if glob_cfg.submissions.save:
     print("\nSaving submission for best model...")
