@@ -10,16 +10,16 @@ class SVMClassifier(Classifier):
         super(SVMClassifier, self).__init__(kernel)
         self.C = C
         self.support_vectors = []
+        self.labels = None
 
-    def fit_dual(self, data, labels):
+    def fit_dual(self, K, labels):
         """
         Solves the dual form using quadratic programming
         Solve $\min_x (1/2) x^T K x - y^Tx$
         subject to
         $Gx \le h$
         """
-        n = data.shape[0]
-        K = self.kernel(data).astype(float) + np.eye(n) * 1e-6
+        n = labels.shape[0]
         P = cvxopt.matrix(K)
         y = np.array(2 * labels - 1).astype(float)  # to {-1, 1}
         q = -cvxopt.matrix(y)
@@ -28,21 +28,19 @@ class SVMClassifier(Classifier):
         alpha = np.array(cvxopt.solvers.qp(P, q, G, h)['x']).reshape(-1)
         return alpha
 
-    def fit_dual_with_intercept(self, data, labels):
+    def fit_dual_with_intercept(self, K, labels):
         """
         Solvers the dual with intercept
         Args:
             data:
             labels:
         """
-        n = data.shape[0]
-        K = self.kernel(data).astype(float) + np.eye(n) * 1e-6
+        n = labels.shape[0]
         y = np.array(2 * labels - 1).astype(float)  # to {-1, 1}
-        ones = np.ones_like(y)
         P = cvxopt.matrix(np.outer(y, y) * K)
-        q = cvxopt.matrix(-ones)
+        q = cvxopt.matrix(-np.ones(n))
         G = cvxopt.matrix(np.vstack([np.eye(n), -np.eye(n)]))
-        h = cvxopt.matrix(np.hstack([self.C * ones, np.zeros_like(y)]))
+        h = cvxopt.matrix(np.hstack([self.C * np.ones(n), np.zeros(n)]))
         A = cvxopt.matrix(y, (1, n), "d")
         b = cvxopt.matrix(0.0)
         alpha = np.array(cvxopt.solvers.qp(P, q, G, h, A, b)['x']).reshape(-1)
@@ -56,10 +54,15 @@ class SVMClassifier(Classifier):
             labels: labels
         Returns:
         """
-        alpha = self.fit_dual_with_intercept(data, labels)
+        n = data.shape[0]
+        K = self.kernel(data).astype(float) + np.eye(n) * 1e-6
+        alpha = self.fit_dual_with_intercept(K, labels)
         self.alpha = alpha
         not_null = np.abs(self.alpha) > 1e-3
         self.alpha = self.alpha[not_null]
+        self.labels = labels[not_null]
         print("{} support vectors found.".format(self.alpha.shape[0]))
         self.support_vectors = data[not_null]
+        K = K[not_null, :]
+        self.intercept = np.mean(K[:, not_null] @ (self.alpha * self.labels) - self.labels)
 

@@ -9,6 +9,7 @@ class Classifier:
         self.alpha = None
         self.training_data = None
         self.support_vectors = None
+        self.intercept = 0
 
     def set_support_vectors(self):
         pass
@@ -32,7 +33,7 @@ class Classifier:
         """
         assert self.support_vectors is not None, "Use fit before predicting."
         K = self.kernel(self.support_vectors, data)
-        f = np.sign(K @ self.alpha)  # in {-1, 0, 1}
+        f = np.sign(K @ self.alpha - self.intercept)  # in {-1, 0, 1}
         return np.round((f + 1) / 2).astype(int)  # convert into {0, 1}
 
     def evaluate(self, data, labels):
