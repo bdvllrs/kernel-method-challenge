@@ -63,6 +63,6 @@ class SVMClassifier(Classifier):
         self.labels = labels[not_null]
         print("{} support vectors found.".format(self.alpha.shape[0]))
         self.support_vectors = data[not_null]
-        # K = K[not_null, :]
-        # self.intercept = np.mean(K[:, not_null] @ (self.alpha * self.labels) - self.labels)
+        K = K[not_null, :]
+        self.intercept = np.mean(self.labels - np.sum(K[:, not_null] * self.alpha * self.labels, axis=1))
 

@@ -76,7 +76,7 @@ class Kernel:
         if self.normalize:
             diag = np.diag(gram)
             norm_consts = np.sqrt(np.outer(diag, diag))
-            gram = gram /norm_consts
+            gram = gram / norm_consts
         return gram
 
     def apply(self, embed1, embed2, idx1, idx2):

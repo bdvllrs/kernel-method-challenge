@@ -87,9 +87,10 @@ def get_kernel(conf) -> kernels.Kernel:
                                                   default_args['e'])
         else:
             kernel = kernels.OneHotKernel(conf.memoize)
-        kernel.set_args(kernel_conf.type, kernel_conf.gamma, kernel_conf.degree, kernel_conf.r, kernel_conf.normalize)
+        kernel.set_args(kernel_conf.type, kernel_conf.gamma, kernel_conf.degree, kernel_conf.r)
         list_kernels.append(kernel)
     kernel = kernels.SumKernel(conf.memoize, list_kernels, list_coefs)
+    kernel.set_args(normalize=conf.normalize)
     return kernel
 
 
