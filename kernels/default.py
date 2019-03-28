@@ -13,6 +13,7 @@ class Kernel:
         self.gamma = "auto"
         self.d = 2
         self.r = 0
+        self.normalize = False
 
     def config_digest(self):
         """
@@ -24,9 +25,10 @@ class Kernel:
     def save(self):
         self.memoizer.save()
 
-    def set_args(self, kernel_type="linear", gamma="auto", degree=2, r=0):
+    def set_args(self, kernel_type="linear", gamma="auto", degree=2, r=0, normalize=False):
         """
         Args:
+            normalize: if True, normalizes the gram matrix: K_norm(x, y) = K(x, y) / sqrt(K(x, x)K(y, y))
             kernel_type:  in (linear, polynomial, gaussian, sigmoid)
             gamma: if None, auto defined
             degree: if polynomial kernel, degree of the polynomial. Default 2.
@@ -36,6 +38,7 @@ class Kernel:
         self.gamma = gamma
         self.d = degree
         self.r = r
+        self.normalize = normalize
 
     def __call__(self, data_1, data_2=None):
         """
@@ -70,7 +73,10 @@ class Kernel:
                         gram[i, j] = gram[j, i]
                         progress_bar.update(1)
         self.memoizer["gram.{}.{}".format(hash_1, hash_2)] = gram
-
+        if self.normalize:
+            diag = np.diag(gram)
+            norm_consts = np.sqrt(np.outer(diag, diag))
+            gram = gram /norm_consts
         return gram
 
     def apply(self, embed1, embed2, idx1, idx2):

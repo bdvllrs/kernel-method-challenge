@@ -21,6 +21,7 @@ global:
         gamma: auto # parameter for polynomial, gaussian and sigmoid
         degree: 2 # if polynomial, degree of the polynomial
         r: 0  # added constant for polynomial and sigmoid.
+        normalize: Yes # If true, normalizes the gram matrix: K_norm(x, y) = K(x, y) / sqrt(K(x, x) K(y, y))
         args: {}
 
       - name: spectrum # in ["onehot", "spectrum", "mismatch", "substring", "local-alignment", "sum"]
@@ -28,6 +29,7 @@ global:
         gamma: auto # parameter for polynomial, gaussian and sigmoid
         degree: 2 # if polynomial, degree of the polynomial
         r: 0  # added constant for polynomial and sigmoid.
+        normalize: Yes
         args: {}
 
   classifiers:

@@ -12,10 +12,16 @@ def hamming_distance(seq1, seq2):
 
 
 class MismatchKernel(Kernel):
+    """
+    Mismatch kernel from Leslie et al. (https://cseweb.ucsd.edu/~eeskin/papers/mismatch-nips02.pdf)
+
+    Implementation with pre-indexing.
+    This can cause a memory issue if k is too big.
+    We only experiment with k <= 6, and pre-indexing is possible.
+    """
 
     def __init__(self, memoize_conf, k=3, m=2):
         """
-        Mismatch kernel from Leslie et al. (https://cseweb.ucsd.edu/~eeskin/papers/mismatch-nips02.pdf)
         Args:
             memoize_conf:
             k: size of the mers
@@ -65,7 +71,10 @@ class MismatchKernel(Kernel):
         return vec
 
     def embed(self, sequences):
-        # Precompute possible k-mers for the training set, not for testing
+        """
+        Pre-index possible k-mers then compute embedding of all sequences
+        """
+        # pre-index possible k-mers for the training set, not for testing
         if self.possible_mismatches == {}:
             print("Add all mer sequences")
             for sequence in sequences:
@@ -73,4 +82,5 @@ class MismatchKernel(Kernel):
             print("Compute the mismatches possibilities")
             self.compute_mismatch_sequences()
             print("Embed sequences")
+        # Compute embeddings
         return super(MismatchKernel, self).embed(sequences)
