@@ -1,46 +1,81 @@
+__author__ = "Benjamin Devillers (bdvllrs)"
+
 import numpy as np
-from kernels.default import Kernel
 from itertools import product
-
-
+from kernels.default import Kernel
 
 __all__ = ['MismatchKernel']
 
 
+def hamming_distance(seq1, seq2):
+    return sum(c1 != c2 for c1, c2 in zip(seq1, seq2))
+
+
 class MismatchKernel(Kernel):
 
-
-    def __init__(self, memoize_conf, length = 3, n_sample= 7):
+    def __init__(self, memoize_conf, k=3, m=2):
         super(MismatchKernel, self).__init__(memoize_conf)
-        self.length = length
-        self.n_sample = n_sample
-        self.possible_numples = {}
-        self.letters = ['A', 'C', 'G', 'T']
-        self.ngrams = lambda a, n: list(zip(*[a[i:] for i in range(n)]))
-        self.all_combin_list = self.create_all_possible_combination(n_sample)
+        self.k = k
+        self.m = m
+        self.possible_mismatches = {}
 
-    def create_all_possible_combination(self, n):
-        return list(product(self.letters, repeat=n))
+    def config_digest(self):
+        return f"k-{self.k}-m-{self.m}"
+
+    def add_mer(self, sequence):
+        """
+        Pre-indexation of the k-mer
+        Args:
+            sequence:
+        """
+        for k in range(0, len(sequence) - (self.k - 1)):
+            mer = sequence[k:k + self.k]
+            self.possible_mismatches[mer] = []
+
+    def compute_mismatch_sequences(self):
+        all_mers = list(product("ATGC", repeat=self.k))
+        for mer1 in self.possible_mismatches.keys():
+            for mer2 in all_mers:
+                if hamming_distance(mer1, ''.join(mer2)) <= self.m:
+                    self.possible_mismatches[mer1].append(''.join(mer2))
+
+    def mer_to_idx(self, seq):
+        letter_to_number = {"A": 0, "G": 1, "C": 2, "T": 3}
+        idx = 0
+        factor = 1
+        for letter in seq:
+            idx += letter_to_number[letter] * factor
+            factor *= 4
+        return idx
+
+    def embed_one(self, sequence):
+        """
+        Embed one sequence into the embedding
+        Args:
+            sequence:
+        """
+        vec = np.zeros(4 ** self.k)  # all possible combination of AGTC
+        for k in range(0, len(sequence) - (self.k - 1)):  # look for all mers in the sequence
+            mer = sequence[k:k + self.k]
+            for mismatch in self.possible_mismatches[mer]:  # go through all mismatches of the mer
+                idx = self.mer_to_idx(mismatch)
+                vec[idx] += 1
+        return vec
 
     def embed(self, sequences):
-        X_train_histo_0 = np.empty([len(sequences), len(self.all_combin_list)])
-        for seq_idx, seq_val in enumerate(sequences):
-            X_train_histo_0[seq_idx, :] = self.embed_one(seq_val, self.n_sample)
-        return(X_train_histo_0)
+        if self.possible_mismatches == {}:
+            print("Add all mer sequences")
+            for sequence in sequences:
+                self.add_mer(sequence)
+            print("Compute the mismatches possibilities")
+            self.compute_mismatch_sequences()
+            print("Saving into memoizer.")
+            self.memoizer["nuples"] = self.possible_mismatches
+        return super(MismatchKernel, self).embed(sequences)
 
-    def embed_one(self, sequence, n):
-        decompose_seq = self.ngrams(sequence, n)
-        value = np.zeros([len(self.all_combin_list), ])
-        for ngram in decompose_seq:
-            index_ngram = self.all_combin_list.index(ngram)
-            value[index_ngram] = value[index_ngram] + 1
-            copy_ngram = list(ngram)
-            for ind, cur_letter in enumerate(copy_ngram):
-                for letter in self.letters:
-                    if letter != cur_letter:
-                        new_ngram = list(copy_ngram)
-                        new_ngram[ind] = letter
-                        mismatch_ngram = tuple(new_ngram)
-                        index_ngram = self.all_combin_list .index(mismatch_ngram)
-                        value[index_ngram] = value[index_ngram] + 0.1
-        return value
+    # def apply(self, embed1, embed2, _, __):
+    #     total = 0
+    #     for embed in embed1.keys():
+    #         if embed in embed2.keys():
+    #             total += embed1[embed] * embed2[embed]
+    #     return total

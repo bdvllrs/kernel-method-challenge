@@ -56,13 +56,13 @@ class SVMClassifier(Classifier):
         """
         n = data.shape[0]
         K = self.kernel(data).astype(float) + np.eye(n) * 1e-6
-        alpha = self.fit_dual_with_intercept(K, labels)
+        alpha = self.fit_dual(K, labels)
         self.alpha = alpha
         not_null = np.abs(self.alpha) > 1e-3
         self.alpha = self.alpha[not_null]
         self.labels = labels[not_null]
         print("{} support vectors found.".format(self.alpha.shape[0]))
         self.support_vectors = data[not_null]
-        K = K[not_null, :]
-        self.intercept = np.mean(K[:, not_null] @ (self.alpha * self.labels) - self.labels)
+        # K = K[not_null, :]
+        # self.intercept = np.mean(K[:, not_null] @ (self.alpha * self.labels) - self.labels)
 

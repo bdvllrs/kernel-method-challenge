@@ -14,6 +14,16 @@ class Kernel:
         self.d = 2
         self.r = 0
 
+    def config_digest(self):
+        """
+        To find which value to get in the memoizer.
+        2 diff configs should yield 2 different results in the memoizer.
+        """
+        return ""
+
+    def save(self):
+        self.memoizer.save()
+
     def set_args(self, kernel_type="linear", gamma="auto", degree=2, r=0):
         """
         Args:
@@ -38,8 +48,8 @@ class Kernel:
         if data_2 is None:
             data_2 = data_1
         # Get hashes for memoization
-        hash_1 = hashlib.sha256(data_1.tostring()).hexdigest()
-        hash_2 = hashlib.sha256(data_2.tostring()).hexdigest()
+        hash_1 = hashlib.sha256(data_1.tostring()).hexdigest() + self.config_digest()
+        hash_2 = hashlib.sha256(data_2.tostring()).hexdigest() + self.config_digest()
         if "gram.{}.{}".format(hash_1, hash_2) in self.memoizer:
             print('Using memoized data.')
             path = "gram.{}.{}".format(hash_1, hash_2)
@@ -91,11 +101,11 @@ class Kernel:
 
     def embed(self, sequences):
         # Add the hash so that it is data dependant.
-        path = "embeddings." + hashlib.sha256(sequences.tostring()).hexdigest()
-        if path in self.memoizer:
-            return self.memoizer[path]
+        # path = "embeddings." + hashlib.sha256(sequences.tostring()).hexdigest() + self.config_digest()
+        # if path in self.memoizer:
+        #     return self.memoizer[path]
         embeddings = np.array([self.embed_one(sequences[k]) for k in range(sequences.shape[0])])
-        self.memoizer[path] = embeddings
+        # self.memoizer[path] = embeddings
         return embeddings
 
     def embed_one(self, sequence):
@@ -131,6 +141,14 @@ class SumKernel(Kernel):
         super(SumKernel, self).__init__(memoize_conf)
         self.kernels = kernels
         self.coefs = coefs
+
+    def config_digest(self):
+        return "-".join(type(kernel).__name__ + kernel.config_digest() for kernel in self.kernels)
+
+    def save(self):
+        for kernel in self.kernels:
+            kernel.save()
+        self.memoizer.save()
 
     def embed(self, sequences):
         embeds = []

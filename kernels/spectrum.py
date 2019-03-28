@@ -16,6 +16,9 @@ class SpectrumKernel(Kernel):
         self.length = length
         self.possible_nuples = {}
 
+    def config_digest(self):
+        return f"length-{self.length}"
+
     def add_nuples(self, sequence):
         for k in range(0, len(sequence) - (self.length - 1)):
             nuple = sequence[k:k + self.length]

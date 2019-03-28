@@ -68,7 +68,7 @@ for set_idx in range(3):
             best_ids_set = ids
             best_state_set = hparam
 
-        kernel.memoizer.save()
+        kernel.save()
 
     total_accuracy.append(best_accuracy_set)
     all_predictions.extend(best_predictions_set)

@@ -73,9 +73,9 @@ def get_kernel(conf) -> kernels.Kernel:
             default_args.update(kernel_conf.args.values_())
             kernel = kernels.SpectrumKernel(conf.memoize, default_args['length'])
         elif kernel == "mismatch":
-            default_args = {"length": 3}
+            default_args = {"k": 3, "m": 2}
             default_args.update(kernel_conf.args.values_())
-            kernel = kernels.MismatchKernel(conf.memoize, default_args['length'])
+            kernel = kernels.MismatchKernel(conf.memoize, default_args['k'], default_args['m'])
         elif kernel == "substring":
             default_args = {"length": 3, "lambda_decay": 0.05}
             default_args.update(kernel_conf.args.values_())
