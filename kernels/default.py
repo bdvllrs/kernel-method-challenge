@@ -209,7 +209,8 @@ class SimpleMKL(Kernel):
             K = np.sum([self.coefs[i]*kernel_grams[i] for i in range(M)], axis=0)
             clf.fit(trainset, labels, gram=K)
             alpha = clf.alpha
-            grad_J = lambda x: np.array([-lbd * alpha.T @ self.kernels[i].last_gram[clf.support_idx,:][:,clf.support_idx] @ alpha for i in range(M)])
+            grad = np.array([-lbd * alpha.T @ self.kernels[i].last_gram[clf.support_idx,:][:,clf.support_idx] @ alpha for i in range(M)])
+            grad_J = lambda x: grad
             print(grad_J(0).shape)
             print(projection_fct(self.coefs))
             self.coefs = projected_gradient(self.coefs, grad_J, projection_fct)
