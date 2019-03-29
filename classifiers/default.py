@@ -1,6 +1,6 @@
 import numpy as np
 from utils import metrics
-from kernels import Kernel
+from kernels.default import Kernel
 
 
 class Classifier:

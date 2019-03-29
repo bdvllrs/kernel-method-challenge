@@ -27,8 +27,10 @@ class SVMClassifier(Classifier):
         q = -cvxopt.matrix(y)
         G = cvxopt.matrix(np.concatenate([np.diag(y), -np.diag(y)], axis=0))
         h = cvxopt.matrix(np.concatenate([self.C * np.ones_like(y), np.zeros_like(y)]))
-        alpha = np.array(cvxopt.solvers.qp(P, q, G, h)['x']).reshape(-1)
-        return alpha
+        opt_result = cvxopt.solvers.qp(P, q, G, h)['x']
+        alpha = np.array(opt_result['x']).reshape(-1)
+        objective = opt_result['primal_objective']
+        return (alpha, objective)
 
     def fit_dual_with_intercept(self, K, y):
         """
@@ -48,10 +50,12 @@ class SVMClassifier(Classifier):
             h = cvxopt.matrix(np.hstack([self.C * np.ones(n), np.zeros(n)]))
         A = cvxopt.matrix(y, (1, n), "d")
         b = cvxopt.matrix(0.0)
-        alpha = np.array(cvxopt.solvers.qp(P, q, G, h, A, b)['x']).reshape(-1)
-        return alpha
+        opt_result = cvxopt.solvers.qp(P, q, G, h, A, b)
+        alpha = np.array(opt_result['x']).reshape(-1)
+        objective = opt_result['primal objective']
+        return (alpha, objective)
 
-    def fit(self, data, labels):
+    def fit(self, data, labels, gram=None):
         """
         Fit the SVM Classifier
         Args:
@@ -61,11 +65,16 @@ class SVMClassifier(Classifier):
         """
         n = data.shape[0]
         labels = np.array(2 * labels - 1).astype(float)  # to {-1, 1}
-        K = self.kernel(data).astype(float) + np.eye(n) * 1e-6
-
-        alpha = self.fit_dual_with_intercept(K, labels)
+        if gram is not None:
+            K = gram
+        else:
+            K = self.kernel(data).astype(float) + np.eye(n) * 1e-6
+        
+        alpha, objective = self.fit_dual_with_intercept(K, labels)
         self.alpha = alpha
+        self.objective = objective
         support = self.alpha > 1e-4
+        self.support_idx = support
         self.alpha = self.alpha[support] * labels[support]
         print("{} support vectors found.".format(self.alpha.shape[0]))
         self.support_vectors = data[support]

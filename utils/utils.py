@@ -89,7 +89,7 @@ def get_kernel(conf) -> kernels.Kernel:
             kernel = kernels.OneHotKernel(conf.memoize)
         kernel.set_args(kernel_conf.type, kernel_conf.gamma, kernel_conf.degree, kernel_conf.r)
         list_kernels.append(kernel)
-    kernel = kernels.SumKernel(conf.memoize, list_kernels, list_coefs)
+    kernel = kernels.SimpleMKL(conf.memoize, list_kernels)
     kernel.set_args(normalize=conf.normalize)
     return kernel
 
