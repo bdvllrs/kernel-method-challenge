@@ -16,6 +16,7 @@ global:
     memoize:
       path: relative/path/to/memoized/data/
     coefs: [1, 0.5]
+    mkl: No
     kernels: # Gets a list of kernels to sum over
       - name: spectrum # in ["onehot", "spectrum", "mismatch", "substring", "local-alignment", "sum"]
         type: linear # in ["linear", "polynomial", "gaussian", "sigmoid"]

@@ -62,8 +62,8 @@ for set_idx in range(3):
         if isinstance(kernel, SimpleMKL):
             kernel.fit(train_x, train_y, clf)
 
-        pca = PCA(kernel)
-        pca.apply(train_x, train_y)
+        # pca = PCA(kernel)
+        # pca.apply(train_x, train_y)
 
         print("\nFitting...")
         clf.fit(train_x, train_y)
