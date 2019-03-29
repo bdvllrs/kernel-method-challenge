@@ -3,6 +3,7 @@ from numpy import mean
 from utils.config import Config, update_config
 from utils.gridsearch import GridSearch
 from utils.utils import get_kernel, get_classifier, get_set, save_submission, kfold, split_train_val
+from kernels.default import SimpleMKL
 
 glob_cfg = Config('config')
 
@@ -46,6 +47,9 @@ for set_idx in range(3):
         ratio = 1 - glob_cfg.data.validation_set.ratio
 
         train_data, train_y, val_data, val_labels = split_train_val(train_set, train_labels, ratio=ratio)
+        
+        if isinstance(kernel, SimpleMKL):
+            kernel.fit(train_data, train_y, clf)
 
         print("\nFitting...")
         clf.fit(train_data, train_y)

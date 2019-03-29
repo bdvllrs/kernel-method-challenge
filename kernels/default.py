@@ -2,8 +2,10 @@ import numpy as np
 import hashlib
 from utils.memoizer import Memoizer
 from tqdm import tqdm
+from utils.projected_gradient import projected_gradient
+#from classifiers.svm import SVMClassifier
 
-__all__ = ['Kernel', 'OneHotKernel', 'SumKernel']
+__all__ = ['Kernel', 'OneHotKernel', 'SumKernel', 'SimpleMKL']
 
 
 class Kernel:
@@ -14,6 +16,7 @@ class Kernel:
         self.d = 2
         self.r = 0
         self.normalize = False
+        self.last_gram = None
 
     def config_digest(self):
         """
@@ -77,6 +80,7 @@ class Kernel:
             diag = np.diag(gram)
             norm_consts = np.sqrt(np.outer(diag, diag))
             gram = gram / norm_consts
+        self.last_gram = gram
         return gram
 
     def apply(self, embed1, embed2, idx1, idx2):
@@ -168,3 +172,64 @@ class SumKernel(Kernel):
         for k in range(len(embed1)):
             result += self.coefs[k] * self.kernels[k].apply(embed1[k], embed2[k], idx1, idx2)
         return result
+    
+class SimpleMKL(Kernel):
+    def __init__(self, memoize_conf, kernels):
+        """
+        Args:
+            memoize_conf:  conf for memoization
+            kernels: list of all instanciated kernels.
+            coefs: Coeficients to combine the kernels
+        """
+        super(SimpleMKL, self).__init__(memoize_conf)
+        self.kernels = kernels
+        self.coefs = None
+
+    def config_digest(self):
+        return "-".join(type(kernel).__name__ + kernel.config_digest() for kernel in self.kernels)
+
+    def save(self):
+        for kernel in self.kernels:
+            kernel.save()
+        self.memoizer.save()
+        
+        
+    def fit(self, trainset, labels, clf, tol=1e-2, n_iter=100):
+        M = len(self.kernels)
+        self.coefs = np.ones((M,))/M
+        i = 0
+        lbd = 1/(2*len(trainset)*clf.C)
+        projection_fct = lambda u: np.abs(u) / np.sum(np.abs(u)) 
+        old_coefs = self.coefs
+        converged = False
+        kernel_grams = [self.kernels[i](trainset[:, i]).astype(float) for i in range(M)]
+        while not converged and i < n_iter:
+            K = np.sum([self.coefs[i]*kernel_grams[i] for i in range(M)], axis=0)
+            clf.fit(trainset, labels, gram=K)
+            alpha = clf.alpha
+            grad_J = lambda x: np.array([-lbd * alpha.T @ self.kernels[i].last_gram[clf.support_idx,:][:,clf.support_idx] @ alpha for i in range(M)])
+            print(grad_J(0).shape)
+            print(projection_fct(self.coefs))
+            self.coefs = projected_gradient(self.coefs, grad_J, projection_fct)
+            if np.linalg.norm(old_coefs - self.coefs) < tol:
+                converged = True
+                break
+            old_coefs = self.coefs
+        print('Converged : coefs = {}'.format(self.coefs))
+
+                
+    def embed(self, sequences):
+        embeds = []
+        for kernel in self.kernels:
+            embeds.append(kernel.embed(sequences))
+        embeddinds = [[embeds[k][i] for k in range(len(self.kernels))] for i in range(len(sequences))]
+        return np.array(embeddinds)
+
+    def apply(self, embed1, embed2, idx1, idx2):
+        result = 0
+        for k in range(len(embed1)):
+            result += self.coefs[k] * self.kernels[k].apply(embed1[k], embed2[k], idx1, idx2)
+        return result
+    
+    
+
