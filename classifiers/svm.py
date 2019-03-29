@@ -21,7 +21,7 @@ class SVMClassifier(Classifier):
 
         Args:
             K: gram
-            labels: in {0, 1}
+            y: in {0, 1}
         """
         P = cvxopt.matrix(K)
         q = -cvxopt.matrix(y)
