@@ -3,7 +3,6 @@ import hashlib
 from utils.memoizer import Memoizer
 from tqdm import tqdm
 from utils.projected_gradient import projected_gradient
-#from classifiers.svm import SVMClassifier
 
 __all__ = ['Kernel', 'OneHotKernel', 'SumKernel', 'SimpleMKL']
 
@@ -24,6 +23,9 @@ class Kernel:
         2 diff configs should yield 2 different results in the memoizer.
         """
         return ""
+
+    def fit(self, *args, **kwargs):
+        pass
 
     def save(self):
         self.memoizer.save()

@@ -2,8 +2,9 @@ from copy import deepcopy
 from numpy import mean
 from utils.config import Config, update_config
 from utils.gridsearch import GridSearch
-from utils.utils import get_kernel, get_classifier, get_set, save_submission, kfold, split_train_val
+from utils.utils import get_kernel, get_classifier, get_sets, save_submission, kfold, split_train_val
 from kernels.default import SimpleMKL
+from utils.pca import PCA
 
 glob_cfg = Config('config')
 
@@ -18,6 +19,20 @@ gridsearch = GridSearch(glob_cfg)
 total_accuracy = []
 all_predictions = []
 all_ids = []
+
+train_data, train_labels, val_data, val_labels = [], [], [], []
+
+train_sets, train_set_labels = get_sets(glob_cfg.data.path, "tr")
+test_data, test_ids = get_sets(glob_cfg.data.path, "te")
+
+ratio = 1 - glob_cfg.data.validation_set.ratio
+
+for idx in range(3):
+    x1, y1, x2, y2 = split_train_val(train_sets[idx], train_set_labels[idx], ratio=ratio)
+    train_data.append(x1)
+    train_labels.append(y1)
+    val_data.append(x2)
+    val_labels.append(y2)
 
 for set_idx in range(3):
     print(f"\nDataset {set_idx + 1}.")
@@ -36,35 +51,34 @@ for set_idx in range(3):
         accuracies = []
         ids = []
 
-        train_set, train_labels = get_set(glob_cfg.data.path, "tr", idx=set_idx)
-        test_data, test_ids = get_set(glob_cfg.data.path, "te", idx=set_idx)
-
-        train_set = kernel.embed(train_set)
-        test_data = kernel.embed(test_data)
+        train_x = kernel.embed(train_data[set_idx])
+        train_y = train_labels[set_idx]
+        val_x = kernel.embed(val_data[set_idx])
+        val_y = val_labels[set_idx]
+        test_x = kernel.embed(test_data[set_idx])
 
         clf = get_classifier(config.classifiers.classifier, kernel, config.classifiers.args.values_())
 
-        ratio = 1 - glob_cfg.data.validation_set.ratio
-
-        train_data, train_y, val_data, val_labels = split_train_val(train_set, train_labels, ratio=ratio)
-        
         if isinstance(kernel, SimpleMKL):
-            kernel.fit(train_data, train_y, clf)
+            kernel.fit(train_x, train_y, clf)
+
+        pca = PCA(kernel)
+        pca.apply(train_x, train_y)
 
         print("\nFitting...")
-        clf.fit(train_data, train_y)
+        clf.fit(train_x, train_y)
 
         print("\nEvaluating...")
-        results = clf.evaluate(val_data, val_labels)
+        results = clf.evaluate(val_x, val_y)
         print("\n Val evaluation:", results)
-        eval_train = clf.evaluate(train_data, train_y)
+        eval_train = clf.evaluate(train_x, train_y)
         print("\nEvaluation on train:", eval_train)
 
         accuracies.append(results["Accuracy"])
 
         print("\nPredicting...")
-        predictions = list(clf.predict(test_data))
-        ids = list(test_ids)
+        predictions = list(clf.predict(test_x))
+        ids = list(test_ids[set_idx])
 
         accuracy = mean(accuracies) if len(accuracies) > 0 else 0
         if accuracy > best_accuracy_set or best_predictions_set is None:

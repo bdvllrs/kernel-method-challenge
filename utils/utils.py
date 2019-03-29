@@ -6,10 +6,10 @@ import os
 import kernels
 import classifiers
 
-__all__ = ['get_classifier', 'get_kernel', 'get_set', 'kfold', 'save_submission', 'split_train_val']
+__all__ = ['get_classifier', 'get_kernel', 'get_sets', 'kfold', 'save_submission', 'split_train_val']
 
 
-def get_set(path, slug="tr", idx=0):
+def get_sets(path, slug="tr"):
     """
     Get data
     Args:
@@ -17,14 +17,24 @@ def get_set(path, slug="tr", idx=0):
         slug: tr for training and te for testing
         idx: between 0 and 2, only use the requested dataset.
     """
-    path = os.path.abspath(os.path.join(os.curdir, path))
-    data = pd.read_csv(os.path.join(path, "X{}{}.csv".format(slug, idx)))
-    dataset = data['seq'].values
-    ids = data['Id']
+    datasets = []
+    all_labels = []
+    all_ids = []
+    for idx in range(3):
+        path = os.path.abspath(os.path.join(os.curdir, path))
+        data = pd.read_csv(os.path.join(path, "X{}{}.csv".format(slug, idx)))
+        dataset = data['seq'].values
+        ids = data['Id']
+        if slug == "tr":
+            labels = pd.read_csv(os.path.join(path, "Y{}{}.csv".format(slug, idx)))['Bound'].values
+            datasets.append(dataset)
+            all_labels.append(labels)
+        else:
+            datasets.append(dataset)
+            all_ids.append(ids)
     if slug == "tr":
-        labels = pd.read_csv(os.path.join(path, "Y{}{}.csv".format(slug, idx)))['Bound'].values
-        return dataset, labels
-    return dataset, ids
+        return datasets, all_labels
+    return datasets, all_ids
 
 
 def save_submission(conf, predictions, test_ids, accuracy):
