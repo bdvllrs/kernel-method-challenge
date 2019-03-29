@@ -72,9 +72,10 @@ def get_kernel(conf) -> kernels.Kernel:
     list_coefs = []
     for k in range(len(all_kernels)):
         kernel = all_kernels[k]["name"]
-        coef = conf.coefs[k]
-        assert coef >= 0, f"Coefficient for kernel {k + 1} must be positive."
-        list_coefs.append(coef)
+        if not conf.mkl:
+            coef = conf.coefs[k]
+            assert coef >= 0, f"Coefficient for kernel {k + 1} must be positive."
+            list_coefs.append(coef)
         kernel_conf = conf.kernels[k]
         assert kernel in ['onehot', 'spectrum', "mismatch", "substring", "local-alignment"], "Unknown requested kernel."
 
