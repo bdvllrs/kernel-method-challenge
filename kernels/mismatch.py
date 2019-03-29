@@ -3,6 +3,7 @@ __author__ = "Benjamin Devillers (bdvllrs)"
 import numpy as np
 from itertools import product
 from kernels.default import Kernel
+from utils.config import Config
 
 __all__ = ['MismatchKernel']
 
@@ -84,3 +85,12 @@ class MismatchKernel(Kernel):
             print("Embed sequences")
         # Compute embeddings
         return super(MismatchKernel, self).embed(sequences)
+
+
+if __name__ == "__main__":
+    config = Config("../config/")
+    kernel = MismatchKernel(config["global"].kernels.memoize, 2, 1)
+    print(kernel.embed(np.array(["ACCG"])))
+    print(kernel.possible_mismatches)
+    print(kernel.all_mers)
+

@@ -33,8 +33,6 @@ class Classifier:
         """
         assert self.support_vectors is not None, "Use fit before predicting."
         K = self.kernel(self.support_vectors, data)
-        print(self.intercept)
-        print(K)
         f = np.sign(K @ self.alpha + self.intercept)  # in {-1, 0, 1}
         return np.round((f + 1) / 2).astype(int)  # convert into {0, 1}
 
