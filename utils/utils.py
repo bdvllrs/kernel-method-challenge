@@ -37,20 +37,24 @@ def get_sets(path, slug="tr"):
     return datasets, all_ids
 
 
-def save_submission(conf, predictions, test_ids, accuracy):
+def save_submission(conf, predictions, test_ids, accuracy, final_submission=False):
     path = conf.submissions.path
     ordered_pred = np.zeros_like(predictions)
     for k, idx in enumerate(test_ids):
         ordered_pred[idx] = predictions[k]
     date = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-    filename = f"submission_val-acc_{accuracy}_{date}"
-    path_csv = os.path.abspath(os.path.join(os.curdir, path, filename + ".csv"))
-    path_yaml = os.path.abspath(os.path.join(os.curdir, path, filename + ".yaml"))
+    if final_submission:
+        filename = f"Yte"
+        path_csv = os.path.abspath(os.path.join(os.curdir, filename + ".csv"))
+    else:
+        filename = f"submission_val-acc_{accuracy}_{date}"
+        path_csv = os.path.abspath(os.path.join(os.curdir, path, filename + ".csv"))
+        path_yaml = os.path.abspath(os.path.join(os.curdir, path, filename + ".yaml"))
+        conf.save_(path_yaml)
     with open(path_csv, 'w') as f:
         f.write('Id,Bound\n')
         for i in range(len(ordered_pred)):
             f.write(str(i) + ',' + str(ordered_pred[i]) + '\n')
-    conf.save_(path_yaml)
 
 
 def split_train_val(data, labels, ratio):

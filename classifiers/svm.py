@@ -11,6 +11,8 @@ class SVMClassifier(Classifier):
         self.C = C
         self.support_vectors = []
         self.labels = None
+        self.objective = None
+        self.support_idx = None
 
     def fit_dual(self, K, y):
         """
@@ -69,7 +71,7 @@ class SVMClassifier(Classifier):
             K = gram
         else:
             K = self.kernel(data).astype(float) + np.eye(n) * 1e-6
-        
+
         alpha, objective = self.fit_dual_with_intercept(K, labels)
         self.alpha = alpha
         self.objective = objective
@@ -114,7 +116,6 @@ if __name__ == "__main__":
 
     w1 = np.sum(clf.alpha * clf.support_vectors[:, 0])
     w2 = np.sum(clf.alpha * clf.support_vectors[:, 1])
-    # b = w1 *
     t = np.linspace(0, 1, 3)
     line = (-clf.intercept - t * w1) / w2
     x, y = train_set[:, 0], train_set[:, 1]
