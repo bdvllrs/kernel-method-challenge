@@ -1,6 +1,6 @@
-# Kernel_method_challenge
+# Kernel Method Challenge
 
-Kaggle challenge on DNA sequence classification for Kernel Methods for Machine Learning Course.
+Kaggle challenge on DNA sequence classification for the MVA Msc Kernel Methods for Machine Learning Course.
 
 ## Memoizer
 To improve performance, the class `utils.Memoizer` is used to save data to disk. The kernel have an instance in the `memoizer`
