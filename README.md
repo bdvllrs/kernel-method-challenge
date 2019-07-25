@@ -48,9 +48,6 @@ Among :
 
 Args :
 - C : C-svm.
-- solver : solver to use. Among :
-    - qp : quadratic program
-    - sklearn : sklearn svm 
     
 #### logistic-regression
 
